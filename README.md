@@ -1,2 +1,1 @@
-# recipe-app-api
-source code
+# Aplikacja e-learningowa

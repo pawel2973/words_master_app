@@ -5,7 +5,7 @@ MAINTAINER Pawel Fiolek
 ENV PYTHONUNBUFFERED 1
 
 # Copy req from our system directory into the docker image.
-COPY ./requirements.txt /requirements.txt
+COPY ./requirements.txt /backend/requirements.txt
 
 # Uses a package manager taht comes with Alpine.
 # Add a package, update registry before we add it, don't store registry index in our docker file
@@ -16,20 +16,22 @@ RUN apk add --update --no-cache postgresql-client
 RUN apk add --update --no-cache --virtual .tmp-build-deps gcc libc-dev postgresql-dev
 
 # Install req using pip into the docker image.
-RUN pip install -r /requirements.txt
+RUN pip install -r /backend/requirements.txt
 
 # Delete unnecessary, temporary req
 RUN apk del .tmp-build-deps
 
 # Create directory within our Docker image that we can use to store app source code.
 # create directory
-RUN mkdir /backend
+RUN mkdir -p app/backend
 
 # switch direactory to default
-WORKDIR /backend
+WORKDIR /app/backend
 
 # copy app folder from our local machine folder to the docker image app folder
-COPY ./backend /backend
+COPY . /app/backend
+
+# RUN ls -a /app/backend
 
 # Create user for running app only
 RUN adduser -D user
