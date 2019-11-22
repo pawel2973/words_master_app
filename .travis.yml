@@ -1,0 +1,13 @@
+# The latest stable python version for Travis is 3.6.
+# We use this only to run our Docker image which will have the correct version of Python 3.7.
+language: python
+python:
+  - "3.6"
+
+services:
+  - docker
+
+before_script: pip install docker-compose
+
+script:
+  - docker-compose run app sh -c "python manage.py test && flake8"

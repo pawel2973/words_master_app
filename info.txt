@@ -1,0 +1,69 @@
+# Docker commands
+---
+1) Uruchom polecenie shell wewnatrz kontenera aplikacji "backend"
+docker-compose run -rm backend sh -c ""
+
+2) Uruchom testy dla aplikacji
+docker-compose run --rm backend sh -c "python manage.py test && flake8"
+
+3) Stworz SU
+docker-compose run backend sh -c "python manage.py createsuperuser"
+
+4) Utworz aplikacje Users
+docker-compose run --rm backend sh -c "python manage.py startapp user"
+
+5) Migruj baze danych
+docker-compose run --rm backend sh -c "python manage.py makemigrations"
+
+6) docker-compose start
+
+7) docker-compose stop
+
+8) docker-compose logs -f
+
+# Inne polecenia
+---
+1) Utworz projekt aplikacji django w obecnej lokalizacji z poziomu lini polecen
+docker-compose run backend sh -c "django-admin.py startproject backend ."
+
+PW
+---
+admin@admin.pl  
+Admin123
+
+test@test.pl
+Test1
+
+DJANGO 
+-------
+Struktura
+
+1) __init.py__
+Informuje pythona, ze dany katalog to python package
+
+2) settings.py
+Zawiera opcje konfiguracyjne dla naszej aplikacji
+
+3) urls.py
+Zawiera konfiguracje adresow URL dla naszej aplikacji
+
+4) wsgi.py 
+Specyfikacja interfejsu za pomoca ktorej komunikuja sie serwer i aplikacja 
+
+5) manage.py
+Pozwala na interakcję z projektem django
+
+6) __pycache__
+Zawiera skompilowany kod bajtowy. Pozwala na szybsza kompilacje
+
+
+API 
+1) models.py
+Zawiera obiekty ktore pozniej sa mapowane do systemu bazodanowego.
+Na ich podstawie tworzone sa tabele w bazie danych.
+
+2) serializers.py
+Serializer przeksztalca instancje modelu bazodanowego do formatu JSON.
+
+3) views.py
+Pozwala na stworzenie endpointow dla naszego API.
