@@ -6,7 +6,7 @@ const PublicRoute = ({ component: Component, logged_in, ...rest}) => {
   return (
   <Route
     {...rest}
-    render={props =>
+    render={props =>      
       (!logged_in ? (
         <Component {...props} {...rest} />
       ) : (

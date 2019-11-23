@@ -1,20 +1,12 @@
-.Button {
-    margin-top: 20px;
+.ButtonUpdate {
+  margin-top: 20px;
+  margin-right: 10px;
+}
+
+.ButtonChangePass {
+  margin-top: 20px;
 }
 
 .FormRow {
-    margin-bottom: 10px;
-}
-
-.ProfileAvatar {
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.ProfileAvatar img {
-    height: 200px;
-    width: 200px;
+  margin-bottom: 10px;
 }

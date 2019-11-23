@@ -6,12 +6,12 @@ from rest_framework.response import Response
 from user.serializers import UserSerializer, AuthTokenSerializer, TokenSerializer
 from rest_framework.authtoken.models import Token
 
-
+# /user/create/
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system"""
     serializer_class = UserSerializer
 
-
+# /user/login
 class CreateTokenView(ObtainAuthToken):
     """Create a new auth token for the user"""
     serializer_class = AuthTokenSerializer
@@ -25,7 +25,7 @@ class CreateTokenView(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'id': user.id, 'email': user.email, 'account_type': user.account_type})
 
-
+# /user/logout/
 class DestroyTokenView(generics.CreateAPIView):
     serializer_class = TokenSerializer
     authentication_classes = (authentication.TokenAuthentication,)
@@ -35,7 +35,7 @@ class DestroyTokenView(generics.CreateAPIView):
         Token.objects.filter(user=self.request.user).delete()
         return Response(status=status.HTTP_200_OK)
 
-
+# /user/me/
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Manage the authenticated user"""
     serializer_class = UserSerializer
