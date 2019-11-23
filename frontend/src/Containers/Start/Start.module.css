@@ -1,0 +1,11 @@
+.Jumbo {
+    background-color: rgb(255, 255, 253);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border: 2px solid forestgreen;
+    margin-top: 20px;
+}
+
+.hr {
+    background-color: black;
+}

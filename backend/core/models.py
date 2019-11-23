@@ -42,7 +42,8 @@ ACC_TYPE_CHOICES = (
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model that supports using email insted of username"""
     email = models.EmailField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     account_type = models.CharField(default="user", choices=ACC_TYPE_CHOICES, max_length=255)

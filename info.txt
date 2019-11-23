@@ -67,3 +67,19 @@ Serializer przeksztalca instancje modelu bazodanowego do formatu JSON.
 
 3) views.py
 Pozwala na stworzenie endpointow dla naszego API.
+
+
+React
+------
+1) npx create-react-app frontend
+
+2) axios
+npm install axios --save
+
+3) router
+npm install react-router-dom --save
+
+4) bootstrap
+npm install react-bootstrap bootstrap --save
+
+5) autosize text area

@@ -1,0 +1,221 @@
+.PostSection {
+    margin-bottom: 5px;
+}
+
+.Author {
+    /*position: relative;*/
+    height: 40px;
+}
+
+.Author img {
+    float: left;
+    height: 40px;
+    width: 40px;
+    margin: 0 5px 0 0;
+}
+
+.Author a {
+    color: #385898;
+    line-height: 1.5;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.Author span {
+    display: block;
+    color: #616770;
+    line-height: 1;
+    font-size: 13px;
+}
+
+.BtnMore {
+    position: absolute;
+    right: 15px;
+    top: 0;
+}
+
+.Title {
+    width: 100%;
+    height: 25px;
+    padding: 1px 5px 1px 5px;
+    background: #007BFF;
+    line-height: 25px;
+    border-radius: 3px;
+    text-align: center;
+    color: white;
+}
+
+.PostImage {
+    display: flex;
+    margin: 0 auto 5px auto;
+    border-radius: 3px;
+}
+
+.More {
+    width: 100%;
+    height: 25px;
+    padding: 1px 5px 1px 5px;
+    border-radius: 3px;
+    line-height: 25px;
+    text-align: center;
+    background: #007BFF;
+    color: white;
+}
+
+.PostTab {
+    box-sizing: border-box;
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 3px;
+    text-align: left;
+}
+
+.PostTab i {
+    color: forestgreen;
+    margin: 0 5px 0 0;
+}
+
+.PostTab .TxtData {
+    font-weight: 600;
+}
+
+.PostReactionsInformation {
+    position: relative;
+}
+
+.PostReactionsInformation hr {
+    margin: 4px 0 4px 0;
+}
+
+.PostReactionsInformation__like {
+    display: inline-block;
+    width: calc(50% - 5px);
+    text-align: left;
+    font-size: 16px;
+    line-height: 16px;
+}
+
+.PostReactionsInformation__like i {
+    margin-right: 5px;
+}
+
+.PostReactionsInformation__liked {
+    color: #007BFF;
+}
+
+.PostReactionsInformation__comment {
+    width: calc(50% - 5px);
+    display: inline-block;
+    text-align: right;
+    font-size: 16px;
+    line-height: 16px;
+}
+
+.PostReactionsInformation__comment i {
+    margin-right: 5px;
+}
+
+.PostReaction {
+    display: flex;
+    flex-flow: row;
+    margin: 5px 0 0 0;
+}
+
+.PostReaction__Like {
+    flex: 1 0 calc(50% - 2px);
+    margin-right: 4px;
+}
+
+.PostReaction__Comment {
+    flex: 1 0 calc(50% - 2px);
+}
+
+.PostComments {
+    width: 100%;
+    margin: 5px 0 0 0;
+}
+
+.CommentWrite {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 10px 0 10px 0;
+}
+
+.CommentWrite img {
+    height: 32px;
+    width: 32px;
+    margin: 0 5px 0 0;
+}
+
+.CommentWrite__form {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-end;
+    width: calc(100% - 32px - 5px);
+}
+
+.CommentWrite__form__inside {
+    width: 100%;
+}
+
+.CommentWrite__form__input {
+    box-sizing: border-box;
+    padding: 5px 10px 5px 10px;
+    border-radius: 15px;
+    background: #F2F3F5;
+    outline: none;
+    width: 100%;
+}
+
+.CommentWrite button {
+    width: 33%;
+    padding: 0;
+    border-radius: 15px;
+}
+
+.Comment {
+    display: flex;
+    margin: 0 0 10px 0;
+}
+
+.Comment:last-child {
+    margin: 0;
+}
+
+.Comment__image {
+    margin: 0 5px 0 0;
+    text-align: center;
+}
+
+.Comment__image img {
+    height: 32px;
+    width: 32px;
+    margin: 0 0 5px 0;
+}
+
+.Comment__image button {
+    display: block;
+    width: 32px;
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+.Comment__content {
+    align-self: flex-start;
+    width: 100%;
+    padding: 5px 10px 5px 10px;
+    box-sizing: border-box;
+    border-radius: 15px;
+    background: #F2F3F5;
+}
+
+.Comment__author {
+    color: #385898;
+    font-weight: 600;
+    margin: 0 5px 0 0;
+}

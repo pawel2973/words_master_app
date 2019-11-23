@@ -31,6 +31,7 @@ WORKDIR /app/backend
 # copy app folder from our local machine folder to the docker image app folder
 COPY . /app/backend
 
+
 # RUN ls -a /app/backend
 
 # Create user for running app only

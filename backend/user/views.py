@@ -17,6 +17,14 @@ class CreateTokenView(ObtainAuthToken):
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                            context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'id': user.id, 'email': user.email, 'account_type': user.account_type})
+
 
 class DestroyTokenView(generics.CreateAPIView):
     serializer_class = TokenSerializer
