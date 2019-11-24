@@ -46,11 +46,11 @@ class Toolbar extends Component {
 
           <Nav.Link
             as={NavLink}
-            to="/wall"
+            to="/word-lists"
             exact={true}
             activeStyle={{ color: "white" }}
           >
-            Wall
+            Word Lists
           </Nav.Link>
 
           <Nav.Link

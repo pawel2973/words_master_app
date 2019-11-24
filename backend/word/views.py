@@ -5,9 +5,11 @@ from word.permissions import IsOwner
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.models import User, UserWordList, UserWord, UserTest, UserTestAnswer, ClassWordList, ClassWord, Classroom, ClassTest, StudentTest, StudentTestAnswer
+from core.models import User, UserWordList, UserWord, UserTest, UserTestAnswer, \
+    ClassWordList, ClassWord, Classroom, ClassTest, StudentTest, StudentTestAnswer
 
 from word import serializers
+
 
 # class SampleViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
 # /word/userwordlist/
@@ -36,9 +38,10 @@ class UserWordListView(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
 # /word/userwordlist/{pk}/words/
 # /word/userwordlist/{pk}/words/{pk}/
-class UserWordView(viewsets.ModelViewSet):        
+class UserWordView(viewsets.ModelViewSet):
     """Manage user word in user word list"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsOwner)
@@ -47,10 +50,10 @@ class UserWordView(viewsets.ModelViewSet):
 
     def create(self, serializer, *args, **kwargs):
         """Create a new word in user word list"""
-        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])  
-       
+        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])
+
         # Check who is the owner of the list
-        if self.request.user != User.objects.get(id=wordlist.user.id):            
+        if self.request.user != User.objects.get(id=wordlist.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Standard create method
@@ -62,8 +65,8 @@ class UserWordView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Save user word object to database"""
-        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])  
-        serializer.save(user=self.request.user, userwordlist=wordlist)       
+        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])
+        serializer.save(user=self.request.user, userwordlist=wordlist)
 
     def get_serializer(self, *args, **kwargs):
         """Provide post multiple objects to database"""
@@ -78,9 +81,9 @@ class UserWordView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """Show all words for specific word list"""
-        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])  
+        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])
         # Check who is the owner of the list
-        if self.request.user != User.objects.get(id=wordlist.user.id):            
+        if self.request.user != User.objects.get(id=wordlist.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             queryset = UserWord.objects.filter(userwordlist=self.kwargs['nested_1_pk'], user=self.request.user)
@@ -91,6 +94,7 @@ class UserWordView(viewsets.ModelViewSet):
 
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
+
 
 # /word/userwordlist/{pk}/tests/
 # /word/userwordlist/{pk}/tests/{pk}/
@@ -103,10 +107,10 @@ class UserTestView(viewsets.ModelViewSet):
 
     def create(self, serializer, *args, **kwargs):
         """Create a new user test in user word list"""
-        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])  
-       
+        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])
+
         # Check who is the owner of the test
-        if self.request.user != User.objects.get(id=wordlist.user.id):            
+        if self.request.user != User.objects.get(id=wordlist.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Standard create method
@@ -118,14 +122,14 @@ class UserTestView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer, *args, **kwargs):
         """Save user test to database"""
-        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])  
+        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])
         serializer.save(user=self.request.user, userwordlist=wordlist)
 
     def list(self, request, *args, **kwargs):
         """Show all tests for specific word list"""
-        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])  
+        wordlist = UserWordList.objects.get(pk=self.kwargs['nested_1_pk'])
         # Check who is the owner of the test
-        if self.request.user != User.objects.get(id=wordlist.user.id):            
+        if self.request.user != User.objects.get(id=wordlist.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             queryset = UserTest.objects.filter(userwordlist=self.kwargs['nested_1_pk'])
@@ -136,6 +140,7 @@ class UserTestView(viewsets.ModelViewSet):
 
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
+
 
 # /word/userwordlist/{pk}/tests/{pk}/answers/
 # DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}
@@ -148,9 +153,9 @@ class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewset
 
     def create(self, serializer, *args, **kwargs):
         """Create a new answer in user test"""
-        test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])                
+        test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])
         # Check who is the owner of the test
-        if self.request.user != User.objects.get(id=test.user.id):            
+        if self.request.user != User.objects.get(id=test.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Standard create method
@@ -162,16 +167,16 @@ class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewset
 
     def perform_create(self, serializer, *args, **kwargs):
         """Save user test to database"""
-        test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])  
+        test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])
         serializer.save(user=self.request.user, usertest=test)
 
     def list(self, request, *args, **kwargs):
-        """Show all answers for specific test"""   
-        test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])  
-        # Check who is the owner of the test        
-        if self.request.user != User.objects.get(id=test.user.id):            
+        """Show all answers for specific test"""
+        test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])
+        # Check who is the owner of the test
+        if self.request.user != User.objects.get(id=test.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
-        else: 
+        else:
             answers = UserTestAnswer.objects.filter(usertest=self.kwargs['nested_2_pk'])
             page = self.paginate_queryset(answers)
             if page is not None:
@@ -180,7 +185,8 @@ class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewset
 
             serializer = self.get_serializer(answers, many=True)
             return Response(serializer.data)
- 
+
+
 # TODO: edit
 # /word/userwordlist/{pk}/tests/
 # /word/userwordlist/{pk}/tests/{pk}/
@@ -211,18 +217,13 @@ class ClassWordView(viewsets.ModelViewSet):
     serializer_class = serializers.ClassWordSerializer
     queryset = ClassWord.objects.all()
 
-
-
-
-
-
-
     # def list(self, request, *args, **kwargs):
     #     words = UserWord.objects.filter(userwordlist=1)
     #     result = self.filter_queryset(self.get_queryset())
 
     #     serializer = serializer_class.UserWordSerializer(result, many=True)
     #     return Response(result)
+
 
 # class TagViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
 #     """Manage tags in the database"""
@@ -234,33 +235,33 @@ class ClassWordView(viewsets.ModelViewSet):
 #     def get_queryset(self):
 #         """Return objects for the current authenticated user only"""
 #         return self.queryset.filter(user=self.request.user).order_by('-name')
-          
+
 #     def perform_create(self, serializer):
 #       """Create a new ingredient"""
 #       serializer.save(user=self.request.user)
 
 
-# # class UserWordListView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
-# #     """Manage user word list in the database"""
-# #     authentication_classes = (TokenAuthentication,)
-# #     permission_classes = (IsAuthenticated,)
-# #     queryset = UserWordList.objects.all()
-# #     serializer_class = serializers.UserWordListSerializer
+# class UserWordListView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
+#     """Manage user word list in the database"""
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+#     queryset = UserWordList.objects.all()
+#     serializer_class = serializers.UserWordListSerializer
 
-# #     def get_queryset(self):
-# #         """Return objects for the current authenticated user only"""
-# #         return self.queryset.filter(user=self.request.user).order_by('-name')
+#     def get_queryset(self):
+#         """Return objects for the current authenticated user only"""
+#         return self.queryset.filter(user=self.request.user).order_by('-name')
 
-# #     # def get_object(self):
-# #     #     words = UserWord.objects.all().filter(userwordlist = 1)
-# #     #     serializer = serializers.UserWordSerializer(words)
-# #     #     print("dadadadad")
-# #     #     print (serializer.data)
-# #     #     return Response(serializer.data)
+#     def get_object(self):
+#         words = UserWord.objects.all().filter(userwordlist = 1)
+#         serializer = serializers.UserWordSerializer(words)
+#         print("dadadadad")
+#         print (serializer.data)
+#         return Response(serializer.data)
 
-# #     def perform_create(self, serializer):
-# #         """Create a new word list"""
-# #         serializer.save(user=self.request.user)
+#     def perform_create(self, serializer):
+#         """Create a new word list"""
+#         serializer.save(user=self.request.user)
 
 
 # class UserWordListView(viewsets.ViewSet):
@@ -274,28 +275,28 @@ class ClassWordView(viewsets.ModelViewSet):
 #         serializer = UserWordListSerializer(queryset, many=True)
 #         return Response(serializer.data)
 
-#     # def get_object(self):
-#     #     words = UserWord.objects.all().filter(userwordlist = 1)
-#     #     serializer = serializers.UserWordSerializer(words)
-#     #     print("dadadadad")
-#     #     print (serializer.data)
-#     #     return Response(serializer.data)
+#     def get_object(self):
+#         words = UserWord.objects.all().filter(userwordlist = 1)
+#         serializer = serializers.UserWordSerializer(words)
+#         print("dadadadad")
+#         print (serializer.data)
+#         return Response(serializer.data)
 
-#     # def perform_create(self, serializer):
-#     #     """Create a new word list"""
-#     #     serializer.save(user=self.request.user)
-    
-# # class UserWordView(viewsets.ModelViewSet):
-        
-# #     # """Manage user word in the database"""
-# #     # authentication_classes = (TokenAuthentication,)
-# #     # permission_classes = (IsAuthenticated,)
-# #     # serializer_class = serializers.UserWordSerializer
+#     def perform_create(self, serializer):
+#         """Create a new word list"""
+#         serializer.save(user=self.request.user)
 
-# #     def get_queryset(self):
-# #         """Return objects for the current authenticated user only"""
-# #         return UserWord.objects.filter(userwordlist = 1)
+# class UserWordView(viewsets.ModelViewSet):
 
-# #     # def perform_create(self, serializer):
-# #     #     """Create a new word list"""
-# #     #     serializer.save(userwordlist = 1)
+#     """Manage user word in the database"""
+#     authentication_classes = (TokenAuthentication,)
+#     permission_classes = (IsAuthenticated,)
+#     serializer_class = serializers.UserWordSerializer
+
+#     def get_queryset(self):
+#         """Return objects for the current authenticated user only"""
+#         return UserWord.objects.filter(userwordlist = 1)
+
+#     def perform_create(self, serializer):
+#         """Create a new word list"""
+#         serializer.save(userwordlist = 1)

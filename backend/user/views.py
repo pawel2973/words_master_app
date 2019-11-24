@@ -1,15 +1,17 @@
 from rest_framework import generics, authentication, permissions, status
-from rest_framework.authtoken.views import ObtainAuthToken, APIView
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 from rest_framework.response import Response
 
 from user.serializers import UserSerializer, AuthTokenSerializer, TokenSerializer
 from rest_framework.authtoken.models import Token
 
+
 # /user/create/
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system"""
     serializer_class = UserSerializer
+
 
 # /user/login
 class CreateTokenView(ObtainAuthToken):
@@ -19,11 +21,12 @@ class CreateTokenView(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
-                                            context={'request': request})
+                                           context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'id': user.id, 'email': user.email, 'account_type': user.account_type})
+
 
 # /user/logout/
 class DestroyTokenView(generics.CreateAPIView):
@@ -34,6 +37,7 @@ class DestroyTokenView(generics.CreateAPIView):
     def post(self, request):
         Token.objects.filter(user=self.request.user).delete()
         return Response(status=status.HTTP_200_OK)
+
 
 # /user/me/
 class ManageUserView(generics.RetrieveUpdateAPIView):

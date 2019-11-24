@@ -33,6 +33,7 @@ class UserManager(BaseUserManager):
 
         return user
 
+
 ACC_TYPE_CHOICES = (
     ('user', 'użytkownik'),
     ('teacher', 'nauczyciel')
@@ -52,28 +53,33 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'  # Basically it is specifying to use email as login rather than the username.
 
+
 class UserWordList(models.Model):
     """Word List to be used for a users"""
     name = models.CharField(max_length=255)
+    date = models.DateTimeField(default=datetime.now, blank=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        # related_name='userwordlist'
     )
 
     def __str__(self):
         return str(self.user) + " -> " + self.name
 
+
 class UserWord(models.Model):
     """Word to be used in word list"""
     polish = models.CharField(max_length=255)
-    english = models.CharField(max_length=255)    
+    english = models.CharField(max_length=255)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
     userwordlist = models.ForeignKey(
         UserWordList,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='userword'
     )
 
     def __str__(self):
@@ -123,7 +129,7 @@ class Teacher(models.Model):
 
     def __str__(self):
         return self.user.email + " -> " + self.user.name
-    
+
 
 class Classroom(models.Model):
     """Teacher classorom model"""
@@ -133,7 +139,7 @@ class Classroom(models.Model):
         on_delete=models.CASCADE
     )
     students = models.ManyToManyField(
-        User, 
+        User,
         blank=True
     )
 
@@ -231,4 +237,3 @@ class StudentTestAnswer(models.Model):
         StudentTest,
         on_delete=models.CASCADE
     )
-

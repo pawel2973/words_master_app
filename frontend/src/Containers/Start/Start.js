@@ -33,7 +33,7 @@ class Start extends Component {
 
   render() {
     if (this.state.switchToWordList) {
-      return <Redirect to={{ pathname: "/wall/" }} />;
+      return <Redirect to={{ pathname: "/word-lists/" }} />;
     }
     return (
       <Fragment>

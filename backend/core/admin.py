@@ -30,26 +30,33 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
+
 class ClassroomAdmin(admin.ModelAdmin):
     # Custom classroom display in django admin
     list_display = ['id', 'name', 'teacher']
+
 
 class UserWordListAdmin(admin.ModelAdmin):
     # Custom classroom display in django admin
     list_display = ['name', 'user', 'id']
 
+
 class UserWordAdmin(admin.ModelAdmin):
     # Custom classroom display in django admin
     list_display = ['user', 'userwordlist', 'polish', 'english', 'id']
 
+
 class UserTestAdmin(admin.ModelAdmin):
     list_display = ['userwordlist', 'correct_answers', 'incorrect_answers', 'date', 'id']
+
 
 class UserTestAnswersAdmin(admin.ModelAdmin):
     list_display = ['usertest', 'polish', 'english', 'answer', 'correct', 'id']
 
+
 class TeacherAdmin(admin.ModelAdmin):
     list_display = ['user', 'id']
+
 
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.UserWordList, UserWordListAdmin)

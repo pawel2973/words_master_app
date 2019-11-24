@@ -3,7 +3,7 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import Layout from "./hoc/Layout/Layout";
 import Start from "./Containers/Start/Start";
-import Wall from "./Containers/Wall/Wall";
+// import Wall from "./Containers/Wall/Wall";
 import CreatePost from "./Containers/CreatePost/CreatePost";
 import GoFishing from "./Containers/GoFishing/GoFishing";
 import FindPeople from "./Containers/FindPeople/FindPeople";
@@ -20,6 +20,8 @@ import PublicRoute from "./hoc/PublicRoute/PublicRoute";
 import SignupRoute from "./hoc/SignupRoute/SignupRoute";
 import Followers from "./Containers/Followers/Followers";
 import happyLogo from "./Assets/happy.png";
+import WordLists from "./Containers/WordLists/WordLists";
+import WordListDetail from "./Containers/WordListDetail/WordListDetail";
 
 class App extends Component {
   state = {
@@ -185,8 +187,16 @@ class App extends Component {
               user_id={this.state.user_id}
             />
             <PrivateRoute
-              path="/wall"
-              component={Wall}
+              exact
+              path="/word-lists"
+              component={WordLists}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID"
+              component={WordListDetail}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

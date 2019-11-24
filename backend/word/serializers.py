@@ -5,11 +5,22 @@ from core.models import UserWordList, UserWord, UserTest, UserTestAnswer, Teache
 
 class UserWordListSerializer(serializers.ModelSerializer):
     """Serializer for user word list"""
+    # userword = serializers.StringRelatedField(many=True)
+
+    total_words = serializers.SerializerMethodField(read_only=True)
+
+    def get_total_words(self, userwordlist):
+        return userwordlist.userword.count()
+
+    def to_representation(self, instance):
+        representation = super(UserWordListSerializer, self).to_representation(instance)
+        representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
+        return representation
 
     class Meta:
         model = UserWordList
-        fields = ('id', 'name', 'user')
-        read_only_fields = ('id', 'user')
+        fields = ('id', 'name', 'date', 'user', 'total_words')
+        read_only_fields = ('id', 'user', 'date')
 
 
 class UserWordSerializer(serializers.ModelSerializer):
@@ -23,16 +34,16 @@ class UserWordSerializer(serializers.ModelSerializer):
 
 class UserTestSerializer(serializers.ModelSerializer):
     """Serializer for user test"""
-    
+
     class Meta:
         model = UserTest
         fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'userwordlist', 'user')
-        read_only_fields = ('id', 'date','userwordlist', 'user')
+        read_only_fields = ('id', 'date', 'userwordlist', 'user')
 
 
-class UserTestAnswerSerializers(serializers.ModelSerializer):  
+class UserTestAnswerSerializers(serializers.ModelSerializer):
     """Serializer for user test answer"""
-    
+
     class Meta:
         model = UserTestAnswer
         fields = ('id', 'polish', 'english', 'answer', 'correct', 'usertest', 'user')
@@ -41,7 +52,7 @@ class UserTestAnswerSerializers(serializers.ModelSerializer):
 ## TODO: EDIT
 # class TeacherSerializer(serializers.ModelSerializer):
 #     """Serializer for teacher"""
-    
+
 #     class Meta:
 #         model = Teacher
 #         fields = ('id', 'user')
@@ -50,16 +61,16 @@ class UserTestAnswerSerializers(serializers.ModelSerializer):
 
 class ClassroomSerializer(serializers.ModelSerializer):
     """Serializer for classroom"""
-    
+
     class Meta:
         model = Classroom
         fields = ('id', 'name', 'teacher', 'students')
-        read_only_fields = ('id', 'date','userwordlist', 'user')
+        read_only_fields = ('id', 'date', 'userwordlist', 'user')
 
 
 class ClassWordListSerializer(serializers.ModelSerializer):
     """Serializer for class word list"""
-    
+
     class Meta:
         model = ClassWordList
         fields = ('id', 'name', 'visibility', 'teacher', 'classroom')
@@ -68,25 +79,16 @@ class ClassWordListSerializer(serializers.ModelSerializer):
 
 class ClassWordSerializer(serializers.ModelSerializer):
     """Serializer for class word"""
-    
+
     class Meta:
         model = ClassWord
         fields = ('id', 'polish', 'english', 'teacher', 'classwordlist')
         read_only_fields = ('id', 'teacher', 'classwordlist')
 
 
-class ClassTestSerializer(serializers.ModelSerializer):
-    """Serializer for class test"""
-    
-    class Meta:
-        model = ClassTest
-        fields = ('id', 'name', 'date', 'teacher', 'ratingsystem')
-        read_only_fields = ('id', 'date','teacher')
-
-
 class RatingSystemSerializer(serializers.ModelSerializer):
     """Serializer for rating system"""
-    
+
     class Meta:
         model = RatingSystem
         fields = ('id', 'grade_2', 'grade_3', 'grade_4', 'grade_5', 'teacher')
@@ -95,26 +97,26 @@ class RatingSystemSerializer(serializers.ModelSerializer):
 
 class ClassTestSerializer(serializers.ModelSerializer):
     """Serializer for class test"""
-    
+
     class Meta:
-        model = UserTest
+        model = ClassTest
         fields = ('id', 'name', 'date', 'teacher', 'ratingsystem')
         read_only_fields = ('id', 'teacher', 'ratingsystem')
 
 
 class StudentTestSerializer(serializers.ModelSerializer):
     """Serializer for student test"""
-    
+
     class Meta:
-        model = UserTest
+        model = StudentTest
         fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest')
         read_only_fields = ('id', 'date', 'grade', 'user', 'classtest')
 
 
-class StudentAnswerSerializers(serializers.ModelSerializer):  
+class StudentTestAnswerSerializer(serializers.ModelSerializer):
     """Serializer for student answer"""
-    
+
     class Meta:
-        model = UserTestAnswer
+        model = StudentTestAnswer
         fields = ('id', 'polish', 'english', 'answer', 'correct', 'user', 'studenttest')
         read_only_fields = ('id', 'usertest', 'user', 'studenttest')

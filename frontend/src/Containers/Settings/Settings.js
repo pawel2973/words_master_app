@@ -112,8 +112,8 @@ class Settings extends Component {
               Update
             </Button>
             <Button
-              onClick={this.ButtonChangePass}
-              className={classes.Button2}
+              onClick={this.changePasswordHandler}
+              className={classes.ButtonChangePass}
               variant="primary"
               size="sm"
             >

@@ -10,8 +10,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('id','email', 'password', 'first_name', 'last_name', 'account_type')
-       
+        fields = ('id', 'email', 'password', 'first_name', 'last_name', 'account_type')
+
         extra_kwargs = {
             'password': {'min_length': 5},
             'account_type': {'read_only': True}
@@ -31,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
 
 class AuthTokenSerializer(serializers.Serializer):
     """Serializer for the user authentication object"""
