@@ -4,8 +4,10 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 import Layout from "./hoc/Layout/Layout";
 import Start from "./Containers/Start/Start";
 // import Wall from "./Containers/Wall/Wall";
-import CreatePost from "./Containers/CreatePost/CreatePost";
-import GoFishing from "./Containers/GoFishing/GoFishing";
+// import CreatePost from "./Containers/CreatePost/CreatePost";
+// import GoFishing from "./Containers/GoFishing/GoFishing";
+import Classroom from "./Containers/Classroom/Clasroom";
+import Teacher from "./Containers/Teacher/Teacher";
 import FindPeople from "./Containers/FindPeople/FindPeople";
 import Settings from "./Containers/Settings/Settings";
 import LoginForm from "./Components/Authentication/Login/LoginForm";
@@ -31,7 +33,7 @@ class App extends Component {
     user_id: null,
     account_type: "",
     sign_in: false,
-    success: null,
+    success: false,
     message: ""
   };
 
@@ -152,7 +154,7 @@ class App extends Component {
   };
 
   successConfirmedHandler = () => {
-    this.setState({ success: null });
+    this.setState({ success: null, message: "" });
   };
 
   render() {
@@ -201,14 +203,14 @@ class App extends Component {
               user_id={this.state.user_id}
             />
             <PrivateRoute
-              path="/create-post"
-              component={CreatePost}
+              path="/classroom"
+              component={Classroom}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
             <PrivateRoute
-              path="/go-fishing"
-              component={GoFishing}
+              path="/teacher"
+              component={Teacher}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

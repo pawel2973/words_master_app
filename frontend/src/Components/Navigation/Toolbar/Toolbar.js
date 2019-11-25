@@ -55,20 +55,20 @@ class Toolbar extends Component {
 
           <Nav.Link
             as={NavLink}
-            to="/create-post"
+            to="/classroom"
             exact={true}
             activeStyle={{ color: "white" }}
           >
-            Create Post
+            Classroom
           </Nav.Link>
 
           <Nav.Link
             as={NavLink}
-            to="/find-people"
+            to="/teacher"
             exact={true}
             activeStyle={{ color: "white" }}
           >
-            Find People
+            Teacher
           </Nav.Link>
         </Nav>
         <Nav>
