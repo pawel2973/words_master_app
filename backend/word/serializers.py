@@ -40,6 +40,11 @@ class UserTestSerializer(serializers.ModelSerializer):
         fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'userwordlist', 'user')
         read_only_fields = ('id', 'date', 'userwordlist', 'user')
 
+    def to_representation(self, instance):
+        representation = super(UserTestSerializer, self).to_representation(instance)
+        representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
+        return representation
+
 
 class UserTestAnswerSerializers(serializers.ModelSerializer):
     """Serializer for user test answer"""

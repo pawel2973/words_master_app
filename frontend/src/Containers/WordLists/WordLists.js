@@ -1,6 +1,13 @@
 import React, { Component } from "react";
 import axios from "../../axios";
-import { Button, Col, Form, Table } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Form,
+  Table,
+  Breadcrumb,
+  BreadcrumbItem
+} from "react-bootstrap";
 import classes from "./WordLists.module.css";
 import Wrapper from "../../Components/UI/Wrapper/Wrapper";
 import { Link } from "react-router-dom";
@@ -76,21 +83,30 @@ class WordLists extends Component {
             </Button>
           </td>
           <td>
-            <Button className={classes.ButtonCreate} variant="primary" block>
-              Test
-            </Button>
-          </td>
-          <td>
-            <Button className={classes.ButtonCreate} variant="info" block>
-              Results
-            </Button>
+            <Link
+              to={{
+                pathname: "/word-lists/" + wordlist.id + "/test",
+                state: {
+                  wordlist_name: wordlist.name
+                }
+              }}
+            >
+              <Button className={classes.ButtonCreate} variant="primary" block>
+                Test
+              </Button>
+            </Link>
           </td>
         </tr>
       );
     });
     return (
       <Wrapper>
-        <h1>Word lists</h1>
+        <h1>
+          <i class="fas fa-clipboard-list" /> Word lists
+        </h1>
+        <Breadcrumb>
+          <BreadcrumbItem active>Word lists</BreadcrumbItem>
+        </Breadcrumb>
         <Wrapper>
           <Form>
             <h5>Create word list</h5>

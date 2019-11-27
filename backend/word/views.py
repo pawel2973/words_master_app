@@ -170,6 +170,17 @@ class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewset
         test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])
         serializer.save(user=self.request.user, usertest=test)
 
+    def get_serializer(self, *args, **kwargs):
+        """Provide post multiple objects to database"""
+        if "data" in kwargs:
+            data = kwargs["data"]
+
+            # check if many is required
+            if isinstance(data, list):
+                kwargs["many"] = True
+
+        return super(UserTestAnswerView, self).get_serializer(*args, **kwargs)
+
     def list(self, request, *args, **kwargs):
         """Show all answers for specific test"""
         test = UserTest.objects.get(pk=self.kwargs['nested_2_pk'])

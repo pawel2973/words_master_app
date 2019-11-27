@@ -83,3 +83,6 @@ npm install react-router-dom --save
 npm install react-bootstrap bootstrap --save
 
 5) autosize text area
+
+6) To fix breadcrumb
+npm install -S react-router-bootstrap --save

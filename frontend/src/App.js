@@ -24,6 +24,7 @@ import Followers from "./Containers/Followers/Followers";
 import happyLogo from "./Assets/happy.png";
 import WordLists from "./Containers/WordLists/WordLists";
 import WordListDetail from "./Containers/WordListDetail/WordListDetail";
+import Test from "./Containers/Test/Test";
 
 class App extends Component {
   state = {
@@ -199,6 +200,13 @@ class App extends Component {
               exact
               path="/word-lists/:wordlistID"
               component={WordListDetail}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+             <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID/test"
+              component={Test}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

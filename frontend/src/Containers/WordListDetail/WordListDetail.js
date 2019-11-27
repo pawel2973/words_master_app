@@ -1,12 +1,20 @@
 import React, { Component } from "react";
 import axios from "../../axios";
-import { Button, Col, Form, Table } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Form,
+  Table,
+  Breadcrumb,
+  BreadcrumbItem
+} from "react-bootstrap";
 import classes from "./WordListDetail.module.css";
 import Wrapper from "../../Components/UI/Wrapper/Wrapper";
 import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import happyLogo from "../../Assets/happy.png";
 import Modal from "../../Components/UI/Modal/Modal";
+import { LinkContainer } from "react-router-bootstrap";
 
 class WordListDetail extends Component {
   state = {
@@ -24,16 +32,26 @@ class WordListDetail extends Component {
   };
 
   componentDidMount() {
-    try {
-      this.setState({
-        wordlist_name: this.props.location.state.wordlist_name,
-        wordlist_name_to_update: this.props.location.state.wordlist_name
-      });
-      this.getWordsfromList();
-    } catch (error) {
-      this.setState({ error: true });
-    }
+    this.getList();
+    this.getWordsfromList();
   }
+
+  getList = () => {
+    axios
+      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`
+        }
+      })
+      .then(res => {
+        this.setState({
+          wordlist_name: res.data.name,
+          wordlist_name_to_update: res.data.name
+        });
+        console.log(this.state.wordlist_name);
+      })
+      .catch(error => {});
+  };
 
   getWordsfromList = () => {
     axios
@@ -126,10 +144,12 @@ class WordListDetail extends Component {
         { headers }
       )
       .then(response => {
-        this.setState({
-          success: true,
-          message: "Successful word update."
-        });
+        if (response.status === 200) {
+          this.setState({
+            success: true,
+            message: "Successful word update."
+          });
+        }
       })
       .catch(error => {});
   };
@@ -241,7 +261,19 @@ class WordListDetail extends Component {
           <img src={happyLogo} alt="happy" />
           {this.state.message}
         </Modal>
-        <h1>{this.state.wordlist_name}</h1>
+        <h1>
+          <i class="far fa-edit" /> {this.state.wordlist_name}
+        </h1>
+        <Breadcrumb>
+          <LinkContainer
+            to={{
+              pathname: "/word-lists/"
+            }}
+          >
+            <BreadcrumbItem>Word Lists</BreadcrumbItem>
+          </LinkContainer>
+          <BreadcrumbItem active>{this.state.wordlist_name}</BreadcrumbItem>
+        </Breadcrumb>
         <Wrapper>
           <Form>
             <h5>Manage your word list</h5>
