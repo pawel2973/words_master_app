@@ -83,7 +83,7 @@ class TestAnswers extends Component {
         </Modal>
 
         <h1>
-          <i className="fas fa-trophy" /> Test: {this.state.test.date}
+          <i className="fas fa-history" /> Test: {this.state.test.date}
         </h1>
 
         <Breadcrumb>
@@ -147,7 +147,7 @@ class TestAnswers extends Component {
                     (this.state.test.correct_answers /
                       (this.state.test.correct_answers + this.state.test.incorrect_answers)) *
                       100
-                  )}
+                  ).toString()}
                   %
                 </td>
               </tr>
