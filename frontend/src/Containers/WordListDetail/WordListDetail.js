@@ -1,13 +1,6 @@
 import React, { Component } from "react";
 import axios from "../../axios";
-import {
-  Button,
-  Col,
-  Form,
-  Table,
-  Breadcrumb,
-  BreadcrumbItem
-} from "react-bootstrap";
+import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import classes from "./WordListDetail.module.css";
 import Wrapper from "../../Components/UI/Wrapper/Wrapper";
 import { Redirect } from "react-router-dom";
@@ -19,7 +12,6 @@ import { LinkContainer } from "react-router-bootstrap";
 class WordListDetail extends Component {
   state = {
     words: [],
-    name: "",
     wordlist_id: this.props.match.params.wordlistID,
     wordlist_name: "",
     wordlist_name_to_update: "",
@@ -32,11 +24,11 @@ class WordListDetail extends Component {
   };
 
   componentDidMount() {
-    this.getList();
+    this.getWordsList();
     this.getWordsfromList();
   }
 
-  getList = () => {
+  getWordsList = () => {
     axios
       .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
         headers: {
@@ -48,9 +40,12 @@ class WordListDetail extends Component {
           wordlist_name: res.data.name,
           wordlist_name_to_update: res.data.name
         });
-        console.log(this.state.wordlist_name);
       })
-      .catch(error => {});
+      .catch(error => {
+        this.setState({
+          error: true
+        });
+      });
   };
 
   getWordsfromList = () => {
@@ -72,11 +67,7 @@ class WordListDetail extends Component {
     formData.append("name", name);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .patch(
-        "/api/word/userwordlist/" + this.state.wordlist_id + "/",
-        formData,
-        { headers }
-      )
+      .patch("/api/word/userwordlist/" + this.state.wordlist_id + "/", formData, { headers })
       .then(response => {
         if (response.status === 200) {
           this.setState({
@@ -95,28 +86,27 @@ class WordListDetail extends Component {
         headers: { Authorization: `Token ${localStorage.getItem("token")}` }
       })
       .then(response => {
-        this.setState({ redirect: true });
+        this.setState({
+          redirect: true
+        });
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch(error => {});
   };
 
-  addWordHandler = () => {
+  addWordHandler = e => {
+    e.preventDefault();
     const formData = new FormData();
     formData.append("english", this.state.new_english);
     formData.append("polish", this.state.new_polish);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .post(
-        "/api/word/userwordlist/" + this.state.wordlist_id + "/words/",
-        formData,
-        { headers }
-      )
+      .post("/api/word/userwordlist/" + this.state.wordlist_id + "/words/", formData, { headers })
       .then(response => {
-        console.log(response.status);
         if (response.status === 201) {
-          this.setState({ new_english: "", new_polish: "" });
+          this.setState({
+            new_english: "",
+            new_polish: ""
+          });
           this.getWordsfromList();
         }
       })
@@ -134,15 +124,7 @@ class WordListDetail extends Component {
     Object.keys(word).map(item => formData.append(item, word[item]));
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .patch(
-        "/api/word/userwordlist/" +
-          this.state.wordlist_id +
-          "/words/" +
-          word_id +
-          "/",
-        formData,
-        { headers }
-      )
+      .patch("/api/word/userwordlist/" + this.state.wordlist_id + "/words/" + word_id + "/", formData, { headers })
       .then(response => {
         if (response.status === 200) {
           this.setState({
@@ -161,25 +143,23 @@ class WordListDetail extends Component {
     } else if (lang === "en") {
       words[id].english = e.target.value;
     }
-    this.setState({ words: words });
+    this.setState({
+      words: words
+    });
   };
 
   successConfirmedHandler = () => {
-    this.setState({ success: null, message: null });
+    this.setState({
+      success: false,
+      message: ""
+    });
   };
 
   deleteWordHandler = (e, arr_id, word_id) => {
     axios
-      .delete(
-        "/api/word/userwordlist/" +
-          this.state.wordlist_id +
-          "/words/" +
-          word_id +
-          "/",
-        {
-          headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-        }
-      )
+      .delete("/api/word/userwordlist/" + this.state.wordlist_id + "/words/" + word_id + "/", {
+        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
+      })
       .then(response => {
         if (response.status === 204) {
           const words = [...this.state.words];
@@ -191,9 +171,7 @@ class WordListDetail extends Component {
           });
         }
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch(error => {});
   };
 
   render() {
@@ -201,14 +179,6 @@ class WordListDetail extends Component {
       return <Redirect to={"/word-lists"} />;
     }
 
-    const tablehead = (
-      <thead>
-        <tr>
-          <th>Polish</th>
-          <th>English</th>
-        </tr>
-      </thead>
-    );
     const words = this.state.words.map((word, index) => {
       return (
         <tr key={word.id}>
@@ -254,16 +224,15 @@ class WordListDetail extends Component {
 
     return (
       <Wrapper>
-        <Modal
-          show={this.state.success}
-          modalClosed={this.successConfirmedHandler}
-        >
+        <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
           <img src={happyLogo} alt="happy" />
           {this.state.message}
         </Modal>
+
         <h1>
-          <i class="far fa-edit" /> {this.state.wordlist_name}
+          <i className="far fa-edit" /> {this.state.wordlist_name}
         </h1>
+
         <Breadcrumb>
           <LinkContainer
             to={{
@@ -274,6 +243,7 @@ class WordListDetail extends Component {
           </LinkContainer>
           <BreadcrumbItem active>{this.state.wordlist_name}</BreadcrumbItem>
         </Breadcrumb>
+
         <Wrapper>
           <Form>
             <h5>Manage your word list</h5>
@@ -297,12 +267,7 @@ class WordListDetail extends Component {
                     className={classes.ButtonCreate}
                     variant="primary"
                     block
-                    onClick={e =>
-                      this.updateWordListNameHandler(
-                        e,
-                        this.state.wordlist_name_to_update
-                      )
-                    }
+                    onClick={e => this.updateWordListNameHandler(e, this.state.wordlist_name_to_update)}
                   >
                     change name
                   </Button>
@@ -321,6 +286,7 @@ class WordListDetail extends Component {
             </Form.Group>
           </Form>
         </Wrapper>
+
         <Wrapper>
           <h5>Add word to your list</h5>
           <hr />
@@ -338,9 +304,7 @@ class WordListDetail extends Component {
                     type="text"
                     placeholder="Polish"
                     value={this.state.new_polish}
-                    onChange={event =>
-                      this.setState({ new_polish: event.target.value })
-                    }
+                    onChange={event => this.setState({ new_polish: event.target.value })}
                   />
                 </td>
                 <td>
@@ -348,18 +312,11 @@ class WordListDetail extends Component {
                     type="text"
                     placeholder="English"
                     value={this.state.new_english}
-                    onChange={event =>
-                      this.setState({ new_english: event.target.value })
-                    }
+                    onChange={event => this.setState({ new_english: event.target.value })}
                   />
                 </td>
                 <td>
-                  <Button
-                    className={classes.ButtonCreate}
-                    variant="success"
-                    block
-                    onClick={this.addWordHandler}
-                  >
+                  <Button className={classes.ButtonCreate} variant="success" block onClick={this.addWordHandler}>
                     add
                   </Button>
                 </td>
@@ -367,11 +324,17 @@ class WordListDetail extends Component {
             </tbody>
           </Table>
         </Wrapper>
+
         <Wrapper>
           <h5>Manage your words in list</h5>
           <hr />
           <Table responsive striped bordered hover>
-            {tablehead}
+            <thead>
+              <tr>
+                <th>Polish</th>
+                <th>English</th>
+              </tr>
+            </thead>
             <tbody>{words}</tbody>
           </Table>
         </Wrapper>

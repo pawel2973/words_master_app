@@ -1,46 +1,33 @@
 import React, { Component } from "react";
 import axios from "../../axios";
-import {
-  Button,
-  Col,
-  Form,
-  Table,
-  Breadcrumb,
-  BreadcrumbItem
-} from "react-bootstrap";
-import classes from "./Test.module.css";
+import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+// import classes from "./Test.module.css";
 import Wrapper from "../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import happyLogo from "../../Assets/happy.png";
 import Modal from "../../Components/UI/Modal/Modal";
 import { LinkContainer } from "react-router-bootstrap";
+import { Link } from "react-router-dom";
 
-//TODO: REFACTOR
 class Test extends Component {
   state = {
     words: [],
     tests: [],
-    name: "",
     wordlist_id: this.props.match.params.wordlistID,
     wordlist_name: "",
     wordlist_name_to_update: "",
     success: false,
     message: "",
-    redirect: false,
-    new_english: "",
-    new_polish: "",
-    error: false,
-    created_test_id: ""
+    error: false
   };
 
   componentDidMount() {
-    this.getList();
+    this.getWordsList();
     this.getWordsfromList();
     this.getTests();
   }
 
-  getList = () => {
+  getWordsList = () => {
     axios
       .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
         headers: {
@@ -88,16 +75,9 @@ class Test extends Component {
 
   deleteTestHandler = (e, arr_id, test_id) => {
     axios
-      .delete(
-        "/api/word/userwordlist/" +
-          this.state.wordlist_id +
-          "/tests/" +
-          test_id +
-          "/",
-        {
-          headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-        }
-      )
+      .delete("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + test_id + "/", {
+        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
+      })
       .then(response => {
         if (response.status === 204) {
           const tests = [...this.state.tests];
@@ -112,49 +92,6 @@ class Test extends Component {
       .catch(error => {
         console.log(error);
       });
-  };
-
-  // TODO: delete test
-  deleteWordListHandler = e => {
-    axios
-      .delete("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
-      .then(response => {
-        this.setState({ redirect: true });
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-
-  updateWordHandler = (e, arr_id, word_id) => {
-    e.preventDefault();
-    const word = {
-      polish: this.state.words[arr_id].polish,
-      english: this.state.words[arr_id].english
-    };
-
-    const formData = new FormData();
-    Object.keys(word).map(item => formData.append(item, word[item]));
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
-    axios
-      .patch(
-        "/api/word/userwordlist/" +
-          this.state.wordlist_id +
-          "/words/" +
-          word_id +
-          "/",
-        formData,
-        { headers }
-      )
-      .then(response => {
-        this.setState({
-          success: true,
-          message: "Successful word update."
-        });
-      })
-      .catch(error => {});
   };
 
   finshTestHandler = e => {
@@ -184,21 +121,12 @@ class Test extends Component {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
 
     axios
-      .post(
-        "/api/word/userwordlist/" + this.state.wordlist_id + "/tests/",
-        formTestData,
-        { headers }
-      )
+      .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", formTestData, { headers })
       .then(response => {
-        console.log("1 post");
         //Save answers for test in db
         return axios
           .post(
-            "/api/word/userwordlist/" +
-              this.state.wordlist_id +
-              "/tests/" +
-              response.data.id +
-              "/answers/",
+            "/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + response.data.id + "/answers/",
             answers,
             { headers }
           )
@@ -215,11 +143,11 @@ class Test extends Component {
   };
 
   successConfirmedHandler = () => {
-    this.setState({ success: null, message: null });
+    this.setState({ success: false, message: "" });
   };
 
   render() {
-    const words_new_test = this.state.words.map((word, index) => {
+    const new_test = this.state.words.map((word, index) => {
       return (
         <tr key={word.id}>
           <td>{this.state.words[index].polish}</td>
@@ -243,21 +171,16 @@ class Test extends Component {
           <td>{test.correct_answers + test.incorrect_answers}</td>
           <td>{test.correct_answers}</td>
           <td>{test.incorrect_answers}</td>
+          <td>{Math.floor((test.correct_answers / (test.correct_answers + test.incorrect_answers)) * 100)}%</td>
           <td>
-            {Math.floor(
-              (test.correct_answers /
-                (test.correct_answers + test.incorrect_answers)) *
-                100
-            )}
-            %
+            <Link to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/test/" + test.id }}>
+              <Button variant="primary" block>
+                details
+              </Button>
+            </Link>
           </td>
           <td>
-            <Button
-              className={classes.ButtonCreate}
-              variant="danger"
-              block
-              onClick={e => this.deleteTestHandler(e, index, test.id)}
-            >
+            <Button variant="danger" block onClick={e => this.deleteTestHandler(e, index, test.id)}>
               delete
             </Button>
           </td>
@@ -267,10 +190,7 @@ class Test extends Component {
 
     return (
       <Wrapper>
-        <Modal
-          show={this.state.success}
-          modalClosed={this.successConfirmedHandler}
-        >
+        <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
           <img src={happyLogo} alt="happy" />
           {this.state.message}
         </Modal>
@@ -289,7 +209,7 @@ class Test extends Component {
           </LinkContainer>
           <LinkContainer
             to={{
-              pathname: "/word-lists/1"
+              pathname: "/word-lists/" + this.state.wordlist_id
             }}
           >
             <BreadcrumbItem>{this.state.wordlist_name}</BreadcrumbItem>
@@ -308,7 +228,6 @@ class Test extends Component {
                 <th>Correct answers</th>
                 <th>Incorrect answers</th>
                 <th>Percentage</th>
-                <th>Delete</th>
               </tr>
             </thead>
             <tbody>{test_history}</tbody>
@@ -326,14 +245,9 @@ class Test extends Component {
                   <th>Write an English answer</th>
                 </tr>
               </thead>
-              <tbody>{words_new_test}</tbody>
+              <tbody>{new_test}</tbody>
             </Table>
-            <Button
-              className={classes.ButtonCreate}
-              variant="primary"
-              block
-              type="submit"
-            >
+            <Button variant="primary" block type="submit">
               Finish the test
             </Button>
           </Form>

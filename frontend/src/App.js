@@ -20,7 +20,7 @@ import withErrorHandler from "./hoc/withErrorHandler/withErrorHandler";
 import PrivateRoute from "./hoc/PrivateRoute/PrivateRoute";
 import PublicRoute from "./hoc/PublicRoute/PublicRoute";
 import SignupRoute from "./hoc/SignupRoute/SignupRoute";
-import Followers from "./Containers/Followers/Followers";
+import TestAnswers from "./Containers/TestAnswers/TestAnswers";
 import happyLogo from "./Assets/happy.png";
 import WordLists from "./Containers/WordLists/WordLists";
 import WordListDetail from "./Containers/WordListDetail/WordListDetail";
@@ -167,10 +167,7 @@ class App extends Component {
           user_id={this.state.user_id}
           handle_logout={this.handle_logout}
         >
-          <Modal
-            show={this.state.success}
-            modalClosed={this.successConfirmedHandler}
-          >
+          <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
             <img src={happyLogo} alt="happy" />
             {this.state.message}
           </Modal>
@@ -203,10 +200,17 @@ class App extends Component {
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
-             <PrivateRoute
+            <PrivateRoute
               exact
               path="/word-lists/:wordlistID/test"
               component={Test}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID/test/:testID"
+              component={TestAnswers}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
@@ -229,12 +233,6 @@ class App extends Component {
               user_id={this.state.user_id}
             />
             <PrivateRoute
-              path="/followers"
-              component={Followers}
-              logged_in={this.state.logged_in}
-              user_id={this.state.user_id}
-            />
-            <PrivateRoute
               path="/profile-settings"
               component={Settings}
               logged_in={this.state.logged_in}
@@ -252,10 +250,7 @@ class App extends Component {
               sign_in={this.state.sign_in}
               handle_signup={this.handle_signup}
             />
-            <Route
-              path="/"
-              render={props => <Fragment>404 Nie znaleziono</Fragment>}
-            />
+            <Route path="/" render={props => <Fragment>404 Nie znaleziono</Fragment>} />
           </Switch>
         </Layout>
       </BrowserRouter>

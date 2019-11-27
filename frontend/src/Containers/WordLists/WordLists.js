@@ -1,23 +1,19 @@
 import React, { Component } from "react";
 import axios from "../../axios";
-import {
-  Button,
-  Col,
-  Form,
-  Table,
-  Breadcrumb,
-  BreadcrumbItem
-} from "react-bootstrap";
+import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import classes from "./WordLists.module.css";
 import Wrapper from "../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../Components/UI/Modal/Modal";
+import happyLogo from "../../Assets/happy.png";
 import { Link } from "react-router-dom";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 class WordLists extends Component {
-  // TODO spinner
   state = {
     wordlists: [],
-    name: ""
+    wordlist_name: "",
+    success: false,
+    message: ""
   };
 
   componentDidMount() {
@@ -32,24 +28,37 @@ class WordLists extends Component {
         }
       })
       .then(res => {
-        this.setState({ wordlists: res.data });
+        this.setState({
+          wordlists: res.data
+        });
       })
       .catch(error => {});
   };
 
-  createWordListHandler = () => {
+  addWordListHandler = () => {
     const formData = new FormData();
-    formData.append("name", this.state.name);
+    formData.append("name", this.state.wordlist_name);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
       .post("/api/word/userwordlist/", formData, { headers })
       .then(response => {
         if (response.status === 201) {
-          this.setState({ name: "" });
+          this.setState({
+            wordlist_name: "",
+            success: true,
+            message: "Successful word list create."
+          });
           this.getLists();
         }
       })
       .catch(error => {});
+  };
+
+  successConfirmedHandler = () => {
+    this.setState({
+      success: false,
+      message: ""
+    });
   };
 
   render() {
@@ -60,19 +69,8 @@ class WordLists extends Component {
           <td>{wordlist.date}</td>
           <td>{wordlist.total_words}</td>
           <td>
-            <Link
-              to={{
-                pathname: "/word-lists/" + wordlist.id,
-                state: {
-                  wordlist_name: wordlist.name
-                }
-              }}
-            >
-              <Button
-                className={classes.ButtonCreate}
-                variant="secondary"
-                block
-              >
+            <Link to={{ pathname: "/word-lists/" + wordlist.id }}>
+              <Button className={classes.ButtonCreate} variant="secondary" block>
                 Manage
               </Button>
             </Link>
@@ -101,12 +99,19 @@ class WordLists extends Component {
     });
     return (
       <Wrapper>
+        <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
+          <img src={happyLogo} alt="happy" />
+          {this.state.message}
+        </Modal>
+
         <h1>
-          <i class="fas fa-clipboard-list" /> Word lists
+          <i className="fas fa-clipboard-list" /> Word lists
         </h1>
+
         <Breadcrumb>
           <BreadcrumbItem active>Word lists</BreadcrumbItem>
         </Breadcrumb>
+
         <Wrapper>
           <Form>
             <h5>Create word list</h5>
@@ -116,19 +121,12 @@ class WordLists extends Component {
                   <Form.Control
                     type="text"
                     placeholder="word list name"
-                    value={this.state.name}
-                    onChange={event =>
-                      this.setState({ name: event.target.value })
-                    }
+                    value={this.state.wordlist_name}
+                    onChange={event => this.setState({ wordlist_name: event.target.value })}
                   />
                 </Col>
                 <Col xl={2} lg={3} md={3} sm={4} xs={4}>
-                  <Button
-                    className={classes.ButtonCreate}
-                    variant="primary"
-                    onClick={this.createWordListHandler}
-                    block
-                  >
+                  <Button className={classes.ButtonCreate} variant="primary" onClick={this.addWordListHandler} block>
                     Create
                   </Button>
                 </Col>
@@ -136,6 +134,7 @@ class WordLists extends Component {
             </Form.Group>
           </Form>
         </Wrapper>
+
         <Wrapper>
           <h5>Your word lists</h5>
           <hr />

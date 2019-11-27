@@ -27,7 +27,7 @@ class UserWordListView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """Show all words for specific word list"""
-        queryset = UserWordList.objects.filter(user_id=self.request.user)
+        queryset = UserWordList.objects.filter(user_id=self.request.user).order_by('-date')
         # queryset = UserWord.objects.filter(userwordlist=self.kwargs['nested_1_pk'])
 
         page = self.paginate_queryset(queryset)
@@ -132,7 +132,7 @@ class UserTestView(viewsets.ModelViewSet):
         if self.request.user != User.objects.get(id=wordlist.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            queryset = UserTest.objects.filter(userwordlist=self.kwargs['nested_1_pk'])
+            queryset = UserTest.objects.filter(userwordlist=self.kwargs['nested_1_pk']).order_by('-date')
             page = self.paginate_queryset(queryset)
             if page is not None:
                 serializer = self.get_serializer(page, many=True)
