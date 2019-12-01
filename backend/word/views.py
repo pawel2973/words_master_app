@@ -257,6 +257,17 @@ class ClassroomView(viewsets.ModelViewSet):
         teacher = Teacher.objects.get(user=self.request.user)
         serializer.save(teacher=teacher)
 
+    def list(self, request, *args, **kwargs):
+        teacher = Teacher.objects.get(user=self.request.user)
+        queryset = Classroom.objects.filter(teacher=teacher).order_by('name')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 # /word/userwordlist/{pk}/tests/
 # /word/userwordlist/{pk}/tests/{pk}/

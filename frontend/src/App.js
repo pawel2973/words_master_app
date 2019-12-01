@@ -8,6 +8,7 @@ import Start from "./Containers/Start/Start";
 // import GoFishing from "./Containers/GoFishing/GoFishing";
 import Classroom from "./Containers/Classroom/Classroom";
 import Teacher from "./Containers/Teacher/Teacher";
+import TeacherClassroomDetail from "./Containers/TeacherClassroomDetail/TeacherClassroomDetail";
 import FindPeople from "./Containers/FindPeople/FindPeople";
 import Settings from "./Containers/Settings/Settings";
 import LoginForm from "./Components/Authentication/Login/LoginForm";
@@ -159,10 +160,7 @@ class App extends Component {
           user_id={this.state.user_id}
           handle_logout={this.handle_logout}
         >
-          <Modal
-            show={this.state.success}
-            modalClosed={this.successConfirmedHandler}
-          >
+          <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
             <img src={happyLogo} alt="happy" />
             {this.state.message}
           </Modal>
@@ -216,8 +214,16 @@ class App extends Component {
               user_id={this.state.user_id}
             />
             <PrivateRoute
+              exact
               path="/teacher"
               component={Teacher}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID"
+              component={TeacherClassroomDetail}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
@@ -245,10 +251,7 @@ class App extends Component {
               sign_in={this.state.sign_in}
               handle_signup={this.handle_signup}
             />
-            <Route
-              path="/"
-              render={props => <Fragment>404 Nie znaleziono</Fragment>}
-            />
+            <Route path="/" render={props => <Fragment>404 Nie znaleziono</Fragment>} />
           </Switch>
         </Layout>
       </BrowserRouter>

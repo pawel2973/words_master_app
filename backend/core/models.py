@@ -136,6 +136,9 @@ class Teacher(models.Model):
         on_delete=models.CASCADE
     )
 
+    def __str__(self):
+        return str(self.user)
+
 
 class TeacherApplication(models.Model):
     """Model for the teacher"""
