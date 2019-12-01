@@ -35,8 +35,14 @@ class UserManager(BaseUserManager):
 
 
 ACC_TYPE_CHOICES = (
-    ('user', 'użytkownik'),
-    ('teacher', 'nauczyciel')
+    ('user', 'user'),
+    ('teacher', 'teacher')
+)
+
+TEACHER_APP_STATUS = (
+    ('waiting...', 'waiting...'),
+    ('accepted', 'accepted'),
+    ('rejected', 'rejected')
 )
 
 
@@ -52,6 +58,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'  # Basically it is specifying to use email as login rather than the username.
+
+    def __str__(self):
+        return str(self.email) + " -> " + self.first_name + " " + self.last_name
 
 
 class UserWordList(models.Model):
@@ -127,8 +136,15 @@ class Teacher(models.Model):
         on_delete=models.CASCADE
     )
 
-    def __str__(self):
-        return self.user.email + " -> " + self.user.name
+
+class TeacherApplication(models.Model):
+    """Model for the teacher"""
+    description = models.CharField(max_length=1000, blank=True, default='brak')
+    status = models.CharField(default="waiting...", choices=TEACHER_APP_STATUS, max_length=255)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
 
 
 class Classroom(models.Model):

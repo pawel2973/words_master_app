@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from core.models import User, UserWordList, UserWord, UserTest, UserTestAnswer, \
-    ClassWordList, ClassWord, Classroom, ClassTest, StudentTest, StudentTestAnswer
+    ClassWordList, ClassWord, Classroom, ClassTest, StudentTest, StudentTestAnswer, \
+    Teacher, TeacherApplication
 
 from word import serializers
 
@@ -198,15 +199,63 @@ class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewset
             return Response(serializer.data)
 
 
+# /word/userwordlist/teacher/
+class TeacherView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.TeacherSerializer
+    queryset = Teacher.objects.all()
+
+# /word/userwordlist/teacherapplication/
+
+
+class TeacherApplicationView(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Manage user word list in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = serializers.TeacherApplicationSerializer
+    queryset = TeacherApplication.objects.all()
+
+    def perform_create(self, serializer):
+        """Create a new word list"""
+        serializer.save(user=self.request.user)
+
 # TODO: edit
 # /word/userwordlist/{pk}/tests/
 # /word/userwordlist/{pk}/tests/{pk}/
+
+
 class ClassroomView(viewsets.ModelViewSet):
     """Manage user test in the database"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.ClassroomSerializer
     queryset = Classroom.objects.all()
+
+    def create(self, serializer, *args, **kwargs):
+        """Create a new classrom by teacher"""
+        teacher = None
+        try:
+            teacher = Teacher.objects.get(user=self.request.user)
+        except Teacher.DoesNotExist:
+            teacher = None
+
+       # Check who is the owner of the list
+        if teacher is None:
+            return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            # Standard create method
+            serializer = self.get_serializer(data=self.request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        """Save user word object to database"""
+        teacher = Teacher.objects.get(user=self.request.user)
+        serializer.save(teacher=teacher)
 
 
 # /word/userwordlist/{pk}/tests/

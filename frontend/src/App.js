@@ -6,7 +6,7 @@ import Start from "./Containers/Start/Start";
 // import Wall from "./Containers/Wall/Wall";
 // import CreatePost from "./Containers/CreatePost/CreatePost";
 // import GoFishing from "./Containers/GoFishing/GoFishing";
-import Classroom from "./Containers/Classroom/Clasroom";
+import Classroom from "./Containers/Classroom/Classroom";
 import Teacher from "./Containers/Teacher/Teacher";
 import FindPeople from "./Containers/FindPeople/FindPeople";
 import Settings from "./Containers/Settings/Settings";
@@ -40,32 +40,23 @@ class App extends Component {
 
   componentDidMount() {
     if (this.state.logged_in) {
-      axios
-        .get("/api/user/me/", {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`
-          }
-        })
-        .then(response => {
-          if (response.data.id) {
-            this.setState({
-              email: response.data.email,
-              user_id: response.data.id,
-              account_type: response.data.account_type,
-              password: response.data.password
-            });
-          } else {
-            localStorage.removeItem("token");
-            this.setState({
-              logged_in: false,
-              sign_in: false,
-              email: "",
-              account_type: "",
-              user_id: null
-            });
-          }
-        })
-        .catch(error => {});
+      const userData = localStorage.getItem("userData");
+      const user = JSON.parse(userData);
+      this.setState({
+        email: user.email,
+        user_id: user.id,
+        account_type: user.account_type
+      });
+    } else {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userData");
+      this.setState({
+        logged_in: false,
+        sign_in: false,
+        email: "",
+        account_type: "",
+        user_id: null
+      });
     }
   }
 
@@ -77,14 +68,14 @@ class App extends Component {
     };
     axios
       .post("/api/user/login/", data, headers)
-      .then(response => {
-        console.log(response.status);
-        localStorage.setItem("token", response.data.token);
+      .then(res => {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userData", JSON.stringify(res.data));
         this.setState({
           logged_in: true,
-          email: response.data.email,
-          user_id: response.data.id,
-          account_type: response.data.account_type
+          email: res.data.email,
+          user_id: res.data.id,
+          account_type: res.data.account_type
         });
       })
       .catch(error => {});
@@ -98,8 +89,8 @@ class App extends Component {
     };
     axios
       .post("/api/user/create/", data, headers)
-      .then(response => {
-        if (response.status === 201) {
+      .then(res => {
+        if (res.status === 201) {
           this.setState(
             {
               sign_in: true
@@ -114,6 +105,7 @@ class App extends Component {
   };
 
   handle_logout = () => {
+    localStorage.removeItem("userData");
     localStorage.removeItem("token");
 
     this.setState({
@@ -144,8 +136,8 @@ class App extends Component {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
       .patch("/api/user/me/", formData, { headers })
-      .then(response => {
-        this.setState({ email: response.data.email });
+      .then(res => {
+        this.setState({ email: res.data.email });
         this.setState({
           success: true,
           message: "Successful user data update."
@@ -167,7 +159,10 @@ class App extends Component {
           user_id={this.state.user_id}
           handle_logout={this.handle_logout}
         >
-          <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
+          <Modal
+            show={this.state.success}
+            modalClosed={this.successConfirmedHandler}
+          >
             <img src={happyLogo} alt="happy" />
             {this.state.message}
           </Modal>
@@ -250,7 +245,10 @@ class App extends Component {
               sign_in={this.state.sign_in}
               handle_signup={this.handle_signup}
             />
-            <Route path="/" render={props => <Fragment>404 Nie znaleziono</Fragment>} />
+            <Route
+              path="/"
+              render={props => <Fragment>404 Nie znaleziono</Fragment>}
+            />
           </Switch>
         </Layout>
       </BrowserRouter>

@@ -58,11 +58,16 @@ class TeacherAdmin(admin.ModelAdmin):
     list_display = ['user', 'id']
 
 
+class TeacherApplicationAdmin(admin.ModelAdmin):
+    list_display = ['status', 'user', 'description']
+
+
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.UserWordList, UserWordListAdmin)
 admin.site.register(models.UserWord, UserWordAdmin)
 admin.site.register(models.UserTest, UserTestAdmin)
 admin.site.register(models.UserTestAnswer, UserTestAnswersAdmin)
+admin.site.register(models.TeacherApplication, TeacherApplicationAdmin)
 admin.site.register(models.Teacher, TeacherAdmin)
 admin.site.register(models.Classroom, ClassroomAdmin)
 admin.site.register(models.ClassWordList)

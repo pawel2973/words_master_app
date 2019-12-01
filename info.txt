@@ -7,7 +7,7 @@ docker-compose run -rm backend sh -c ""
 docker-compose run --rm backend sh -c "python manage.py test && flake8"
 
 3) Stworz SU
-docker-compose run backend sh -c "python manage.py createsuperuser"
+docker-compose run --rm backend sh -c "python manage.py createsuperuser"
 
 4) Utworz aplikacje Users
 docker-compose run --rm backend sh -c "python manage.py startapp user"
@@ -81,8 +81,6 @@ npm install react-router-dom --save
 
 4) bootstrap
 npm install react-bootstrap bootstrap --save
-
-5) autosize text area
-
-6) To fix breadcrumb
+ 
+5) To fix breadcrumb
 npm install -S react-router-bootstrap --save

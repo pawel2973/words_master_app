@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from core.models import UserWordList, UserWord, UserTest, UserTestAnswer, Teacher, Classroom, ClassWordList, ClassWord, RatingSystem, ClassTest, StudentTest, StudentTestAnswer
+from core.models import UserWordList, UserWord, UserTest, UserTestAnswer, \
+    Teacher, Classroom, ClassWordList, ClassWord, RatingSystem, ClassTest, \
+    StudentTest, StudentTestAnswer, TeacherApplication
 
 
 class UserWordListSerializer(serializers.ModelSerializer):
@@ -54,14 +56,25 @@ class UserTestAnswerSerializers(serializers.ModelSerializer):
         fields = ('id', 'polish', 'english', 'answer', 'correct', 'usertest', 'user')
         read_only_fields = ('id', 'usertest', 'user')
 
-## TODO: EDIT
-# class TeacherSerializer(serializers.ModelSerializer):
-#     """Serializer for teacher"""
 
-#     class Meta:
-#         model = Teacher
-#         fields = ('id', 'user')
-#         read_only_fields = ('id', 'user')
+class TeacherSerializer(serializers.ModelSerializer):
+    """Serializer for teacher"""
+
+    class Meta:
+        model = Teacher
+        fields = ('id', 'user')
+        read_only_fields = ('id', 'user')
+
+
+class TeacherApplicationSerializer(serializers.ModelSerializer):
+    """Serializer for teacher"""
+
+    class Meta:
+        model = TeacherApplication
+        fields = ('id', 'user', 'description')
+        read_only_fields = ('id', 'user')
+
+# TODO: EDIT
 
 
 class ClassroomSerializer(serializers.ModelSerializer):
@@ -70,7 +83,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom
         fields = ('id', 'name', 'teacher', 'students')
-        read_only_fields = ('id', 'date', 'userwordlist', 'user')
+        read_only_fields = ('id', 'teacher')
 
 
 class ClassWordListSerializer(serializers.ModelSerializer):
