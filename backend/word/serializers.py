@@ -1,8 +1,18 @@
 from rest_framework import serializers
+from drf_writable_nested.serializers import WritableNestedModelSerializer
 
 from core.models import UserWordList, UserWord, UserTest, UserTestAnswer, \
     Teacher, Classroom, ClassWordList, ClassWord, RatingSystem, ClassTest, \
-    StudentTest, StudentTestAnswer, TeacherApplication
+    StudentTest, StudentTestAnswer, TeacherApplication, User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for user word in user word list"""
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'first_name', 'last_name')
+        read_only_fields = ('id', 'email', 'first_name', 'last_name')
 
 
 class UserWordListSerializer(serializers.ModelSerializer):
@@ -74,11 +84,10 @@ class TeacherApplicationSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'description')
         read_only_fields = ('id', 'user')
 
-# TODO: EDIT
 
-
-class ClassroomSerializer(serializers.ModelSerializer):
+class ClassroomSerializer(WritableNestedModelSerializer):
     """Serializer for classroom"""
+    students = UserSerializer(many=True, required=False)
 
     class Meta:
         model = Classroom
@@ -86,13 +95,24 @@ class ClassroomSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'teacher')
 
 
+# TODO EDIT 
 class ClassWordListSerializer(serializers.ModelSerializer):
     """Serializer for class word list"""
 
+    total_words = serializers.SerializerMethodField(read_only=True)
+
+    def get_total_words(self, classwordlist):
+        return classwordlist.classword.count()
+
+    def to_representation(self, instance):
+        representation = super(ClassWordListSerializer, self).to_representation(instance)
+        representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
+        return representation
+
     class Meta:
         model = ClassWordList
-        fields = ('id', 'name', 'visibility', 'teacher', 'classroom')
-        read_only_fields = ('id', 'teacher', 'classroom')
+        fields = ('id', 'date', 'name', 'visibility', 'teacher', 'classroom', 'total_words')
+        read_only_fields = ('id', 'date', 'teacher', 'classroom')
 
 
 class ClassWordSerializer(serializers.ModelSerializer):
@@ -109,7 +129,7 @@ class RatingSystemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RatingSystem
-        fields = ('id', 'grade_2', 'grade_3', 'grade_4', 'grade_5', 'teacher')
+        fields = ('id', 'grade_2', 'grade_3', 'grade_4', 'teacher')
         read_only_fields = ('id', 'teacher')
 
 
@@ -118,8 +138,8 @@ class ClassTestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClassTest
-        fields = ('id', 'name', 'date', 'teacher', 'ratingsystem')
-        read_only_fields = ('id', 'teacher', 'ratingsystem')
+        fields = ('id', 'name', 'date', 'teacher', 'ratingsystem', 'classwordlist')
+        read_only_fields = ('id', 'teacher', 'classwordlist')
 
 
 class StudentTestSerializer(serializers.ModelSerializer):

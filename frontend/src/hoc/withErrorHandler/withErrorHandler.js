@@ -36,15 +36,9 @@ const withErrorHandler = (WrappedComponent, axios) => {
     render() {
       return (
         <Fragment>
-          <Modal
-            show={this.state.error}
-            modalClosed={this.errorConfirmedHandler}
-          >
+          <Modal show={this.state.error} modalClosed={this.errorConfirmedHandler}>
             <img src={errorLogo} alt="Error" />
-            <span className={classes.Title}>
-              {" "}
-              Oops! Something went wrong...
-            </span>
+            <span className={classes.Title}> Oops! Something went wrong...</span>
 
             {this.state.error
               ? Object.keys(this.state.error.response.data).map(key => {

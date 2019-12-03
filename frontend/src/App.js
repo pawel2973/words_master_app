@@ -9,6 +9,7 @@ import Start from "./Containers/Start/Start";
 import Classroom from "./Containers/Classroom/Classroom";
 import Teacher from "./Containers/Teacher/Teacher";
 import TeacherClassroomDetail from "./Containers/TeacherClassroomDetail/TeacherClassroomDetail";
+import TeacherWordLists from "./Containers/TeacherWordLists/TeacherWordLists";
 import FindPeople from "./Containers/FindPeople/FindPeople";
 import Settings from "./Containers/Settings/Settings";
 import LoginForm from "./Components/Authentication/Login/LoginForm";
@@ -26,6 +27,9 @@ import happyLogo from "./Assets/happy.png";
 import WordLists from "./Containers/WordLists/WordLists";
 import WordListDetail from "./Containers/WordListDetail/WordListDetail";
 import Test from "./Containers/Test/Test";
+import TeacherWordListDetail from "./Containers/TeacherWordListDetail/TeacherWordListDetail";
+import CreateTest from "./Containers/CreateTest/CreateTest";
+import TeacherTests from "./Containers/TeacherTests/TeacherTests";
 
 class App extends Component {
   state = {
@@ -227,6 +231,35 @@ class App extends Component {
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID/teacher-tests"
+              component={TeacherTests}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID/word-lists"
+              component={TeacherWordLists}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID/word-lists/:wordlistID"
+              component={TeacherWordListDetail}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID/word-lists/:wordlistID/create-test"
+              component={CreateTest}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
             <PrivateRoute
               path="/find-people"
               component={FindPeople}

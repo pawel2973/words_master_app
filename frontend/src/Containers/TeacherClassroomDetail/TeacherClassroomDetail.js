@@ -1,55 +1,48 @@
 import React, { Component } from "react";
 import axios from "../../axios";
 import { Button, Row, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import classes from "./TeacherClassroomDetail.module.css";
 import Wrapper from "../../Components/UI/Wrapper/Wrapper";
 import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import happyLogo from "../../Assets/happy.png";
+import errorLogo from "../../Assets/error.png";
 import Modal from "../../Components/UI/Modal/Modal";
 import { LinkContainer } from "react-router-bootstrap";
+import { Link } from "react-router-dom";
 
 class TeacherClassroomDetail extends Component {
   state = {
-    words: [],
-
-    wordlist_name: "",
-    wordlist_name_to_update: "",
+    classroom_id: this.props.match.params.classroomID,
+    classroom_name: "",
+    student_email: "",
+    student_id: null,
+    isStudentExist: false,
+    isStudentInClassroom: false,
+    students: [],
+    student: [],
+    show: false,
+    redirect: false,
     success: false,
     message: "",
-    redirect: false,
-    new_english: "",
-    new_polish: "",
-    error: false,
-
-    classroom_id: this.props.match.params.classroomID,
-    classroom_name: ""
+    error: false
   };
 
   componentDidMount() {
     this.getClassroom();
-    // this.getWordsList();
-    // this.getWordsfromList();
+    this.getStudents();
   }
 
-  getWordsList = () => {
+  getStudents = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .get("/api/word/userwordlist/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      // Get students from classroom
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
         this.setState({
-          wordlist_name: res.data.name,
-          wordlist_name_to_update: res.data.name
+          students: res.data.students
         });
       })
-      .catch(error => {
-        this.setState({
-          error: true
-        });
-      });
+      .catch(error => {});
   };
 
   getClassroom = () => {
@@ -62,94 +55,79 @@ class TeacherClassroomDetail extends Component {
       .then(res => {
         this.setState({ classroom_name: res.data.name });
       })
-      .catch(error => {});
-  };
-
-  updateWordListNameHandler = (e, name) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name);
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
-    axios
-      .patch("/api/word/userwordlist/" + this.state.classroom_id + "/", formData, { headers })
-      .then(response => {
-        if (response.status === 200) {
-          this.setState({
-            success: true,
-            wordlist_name: name,
-            message: "Successful word list name update."
-          });
-        }
-      })
-      .catch(error => {});
-  };
-
-  deleteWordListHandler = e => {
-    axios
-      .delete("/api/word/userwordlist/" + this.state.classroom_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
-      .then(response => {
+      .catch(error => {
         this.setState({
           redirect: true
         });
-      })
-      .catch(error => {});
+      });
   };
 
-  addWordHandler = e => {
+  addStudentHandler = e => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("english", this.state.new_english);
-    formData.append("polish", this.state.new_polish);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
+    // Find user with provided email
     axios
-      .post("/api/word/userwordlist/" + this.state.classroom_id + "/words/", formData, { headers })
-      .then(response => {
-        if (response.status === 201) {
+      .get("/api/word/user/", { headers })
+      .then(res => {
+        const users = res.data;
+        users.forEach(user => {
+          if (user.email === this.state.student_email) {
+            // User Found
+            this.state.students.forEach(student => {
+              // Check if user is already in the classroom
+              if (student.email === user.email) {
+                this.setState({
+                  isStudentInClassroom: true
+                });
+              }
+            });
+            if (this.state.isStudentInClassroom === false) {
+              // If students is not in classroom
+              this.setState({
+                isStudentExist: true,
+                student: user,
+                message: "Do you want to add a student to the class?"
+              });
+            }
+          }
+        });
+
+        if (this.state.isStudentExist === false) {
           this.setState({
-            new_english: "",
-            new_polish: ""
+            error: true,
+            message: "User not found."
           });
-          this.getWordsfromList();
+        }
+
+        if (this.state.isStudentInClassroom === true) {
+          this.setState({
+            isStudentInClassroom: false,
+            message: "The student already belongs to the classroom."
+          });
         }
       })
       .catch(error => {});
   };
 
-  updateWordHandler = (e, arr_id, word_id) => {
+  confirmAddStudentHandler = e => {
     e.preventDefault();
-    const word = {
-      polish: this.state.words[arr_id].polish,
-      english: this.state.words[arr_id].english
-    };
+    const students = this.state.students;
+    const student = this.state.student;
+    students.push(student);
 
-    const formData = new FormData();
-    Object.keys(word).map(item => formData.append(item, word[item]));
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .patch("/api/word/userwordlist/" + this.state.classroom_id + "/words/" + word_id + "/", formData, { headers })
+      .patch("/api/word/classroom/" + this.state.classroom_id + "/", { students: students }, { headers })
       .then(response => {
         if (response.status === 200) {
           this.setState({
-            success: true,
-            message: "Successful word update."
+            isStudentExist: false,
+            student_email: ""
           });
         }
       })
       .catch(error => {});
-  };
-
-  onUpdateWordHandler = (id, lang, e) => {
-    const words = [...this.state.words];
-    if (lang === "pl") {
-      words[id].polish = e.target.value;
-    } else if (lang === "en") {
-      words[id].english = e.target.value;
-    }
-    this.setState({
-      words: words
-    });
   };
 
   successConfirmedHandler = () => {
@@ -159,19 +137,32 @@ class TeacherClassroomDetail extends Component {
     });
   };
 
-  deleteWordHandler = (e, arr_id, word_id) => {
+  successAddStudentHandler = () => {
+    this.setState({
+      isStudentExist: false,
+      message: ""
+    });
+  };
+
+  errorConfirmedHandler = () => {
+    this.setState({
+      error: false,
+      message: ""
+    });
+  };
+
+  deleteStudentHandler = (e, arr_id) => {
+    e.preventDefault();
+    const students = [...this.state.students];
+    students.splice(arr_id, 1);
+
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .delete("/api/word/userwordlist/" + this.state.classroom_id + "/words/" + word_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
+      .patch("/api/word/classroom/" + this.state.classroom_id + "/", { students: students }, { headers })
       .then(response => {
-        if (response.status === 204) {
-          const words = [...this.state.words];
-          words.splice(arr_id, 1);
+        if (response.status === 200) {
           this.setState({
-            words: words,
-            success: true,
-            message: "Successful word delete."
+            students: students
           });
         }
       })
@@ -179,36 +170,24 @@ class TeacherClassroomDetail extends Component {
   };
 
   render() {
-    // if (this.state.redirect || this.state.error) {
-    //   return <Redirect to={"/word-lists"} />;
-    // }
+    if (this.state.redirect) {
+      return <Redirect to={"/teacher/"} />;
+    }
 
-    const words = this.state.words.map((word, index) => {
+    const students = this.state.students.map((student, index) => {
       return (
-        <tr key={word.id}>
+        <tr key={index}>
           <td>
-            <Form.Control
-              type="text"
-              placeholder="Polish"
-              value={this.state.words[index].polish}
-              onChange={this.onUpdateWordHandler.bind(this, index, "pl")}
-            />
+            {student.first_name} {student.last_name}
           </td>
+          <td>{student.email}</td>
           <td>
-            <Form.Control
-              type="text"
-              placeholder="English"
-              value={this.state.words[index].english}
-              onChange={this.onUpdateWordHandler.bind(this, index, "en")}
-            />
-          </td>
-          <td>
-            <Button variant="primary" block onClick={e => this.updateWordHandler(e, index, word.id)}>
-              update
+            <Button variant="primary" block>
+              details
             </Button>
           </td>
           <td>
-            <Button variant="danger" block onClick={e => this.deleteWordHandler(e, index, word.id)}>
+            <Button variant="danger" block onClick={e => this.deleteStudentHandler(e, index)}>
               delete
             </Button>
           </td>
@@ -218,8 +197,27 @@ class TeacherClassroomDetail extends Component {
 
     return (
       <Wrapper>
-        <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
+        <Modal show={this.state.success}>
           <img src={happyLogo} alt="happy" />
+          {this.state.message}
+        </Modal>
+
+        <Modal show={this.state.isStudentExist} modalClosed={this.successAddStudentHandler}>
+          <img src={happyLogo} alt="happy" />
+          <Row>
+            <Col>{this.state.message}</Col>
+          </Row>
+          <Row>
+            <Col>
+              <Button variant="success" onClick={this.confirmAddStudentHandler}>
+                Confirm
+              </Button>
+            </Col>
+          </Row>
+        </Modal>
+
+        <Modal show={this.state.error} modalClosed={this.errorConfirmedHandler}>
+          <img src={errorLogo} alt="error" />
           {this.state.message}
         </Modal>
 
@@ -242,15 +240,19 @@ class TeacherClassroomDetail extends Component {
           <h5>Manage your classroom</h5>
           <Row>
             <Col>
-              <Button variant="primary" block>
-                Word lists
-              </Button>
+              <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists" }}>
+                <Button variant="primary" block>
+                  Word lists
+                </Button>
+              </Link>
             </Col>
 
             <Col>
-              <Button variant="secondary" block>
-                Tests
-              </Button>
+              <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/teacher-tests" }}>
+                <Button variant="secondary" block>
+                  Tests
+                </Button>
+              </Link>
             </Col>
 
             <Col>
@@ -269,54 +271,34 @@ class TeacherClassroomDetail extends Component {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Average grade</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>Mateusz Kowalski</td>
-                <td>mate@mat.pl</td>
-                <td>4,65</td>
-                <td>
-                  <Button variant="success" block onClick={this.addWordHandler}>
-                    Details
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="danger" block onClick={this.addWordHandler}>
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            </tbody>
+            <tbody>{students}</tbody>
           </Table>
         </Wrapper>
-        {/* EDIT HERE !!!!!!!!!!!!!!!!!!!!! */}
+
         <Wrapper>
-          <Form>
-            <h5>Add student to class</h5>
-            <Form.Group>
-              <Form.Row>
-                <Col xl={10} lg={9} md={9} sm={8} xs={8}>
-                  <Form.Control
-                    type="text"
-                    placeholder="classroom name"
-                    value={this.state.classroom_name}
-                    onChange={event =>
-                      this.setState({
-                        classroom_name: event.target.value
-                      })
-                    }
-                  />
-                </Col>
-                <Col xl={2} lg={3} md={3} sm={4} xs={4}>
-                  <Button variant="primary" onClick={this.createClasroomHandler} block>
-                    Create
-                  </Button>
-                </Col>
-              </Form.Row>
-            </Form.Group>
-          </Form>
+          <h5>Add student to class</h5>
+          <Row>
+            <Col xl={10} lg={9} md={9} sm={8} xs={8}>
+              <Form.Control
+                type="text"
+                placeholder="provide student email"
+                value={this.state.student_email}
+                onChange={event =>
+                  this.setState({
+                    student_email: event.target.value
+                  })
+                }
+              />
+            </Col>
+
+            <Col xl={2} lg={3} md={3} sm={4} xs={4}>
+              <Button variant="primary" onClick={this.addStudentHandler} block>
+                Add
+              </Button>
+            </Col>
+          </Row>
         </Wrapper>
       </Wrapper>
     );

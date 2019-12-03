@@ -159,7 +159,8 @@ class Classroom(models.Model):
     )
     students = models.ManyToManyField(
         User,
-        blank=True
+        blank=True,
+        related_name="students_list"
     )
 
     def __str__(self):
@@ -169,6 +170,7 @@ class Classroom(models.Model):
 class ClassWordList(models.Model):
     """Word List to be used for a teacher and studens in classroom"""
     name = models.CharField(max_length=255)
+    date = models.DateTimeField(default=datetime.now, blank=False)
     visibility = models.BooleanField(default=False)
     teacher = models.ForeignKey(
         Teacher,
@@ -193,7 +195,8 @@ class ClassWord(models.Model):
     )
     classwordlist = models.ForeignKey(
         ClassWordList,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='classword'
     )
 
     def __str__(self):
@@ -205,7 +208,6 @@ class RatingSystem(models.Model):
     grade_2 = models.PositiveIntegerField()
     grade_3 = models.PositiveIntegerField()
     grade_4 = models.PositiveIntegerField()
-    grade_5 = models.PositiveIntegerField()
     teacher = models.ForeignKey(
         Teacher,
         on_delete=models.CASCADE
@@ -222,6 +224,10 @@ class ClassTest(models.Model):
     )
     ratingsystem = models.OneToOneField(
         RatingSystem,
+        on_delete=models.CASCADE
+    )
+    classwordlist = models.ForeignKey(
+        ClassWordList,
         on_delete=models.CASCADE
     )
 

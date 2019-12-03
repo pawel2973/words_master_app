@@ -5,10 +5,16 @@ import Wrapper from "../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../Components/UI/Modal/Modal";
 import happyLogo from "../../Assets/happy.png";
 import { Link } from "react-router-dom";
+import { LinkContainer } from "react-router-bootstrap";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import { Redirect } from "react-router-dom";
 
-class WordLists extends Component {
+class TeacherWordLists extends Component {
   state = {
+    classroom_id: this.props.match.params.classroomID,
+    classroom_name: "",
+    teacher_id: "",
+
     wordlists: [],
     wordlist_name: "",
     success: false,
@@ -16,12 +22,33 @@ class WordLists extends Component {
   };
 
   componentDidMount() {
-    this.getLists();
+    this.getClassroom();
+    this.getClassWordList();
   }
 
-  getLists = () => {
+  getClassroom = () => {
     axios
-      .get("/api/word/userwordlist/", {
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`
+        }
+      })
+      .then(res => {
+        this.setState({
+          classroom_name: res.data.name,
+          teacher_id: res.data.teacher
+        });
+      })
+      .catch(error => {
+        this.setState({
+          redirect: true
+        });
+      });
+  };
+
+  getClassWordList = () => {
+    axios
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", {
         headers: {
           Authorization: `Token ${localStorage.getItem("token")}`
         }
@@ -31,7 +58,11 @@ class WordLists extends Component {
           wordlists: res.data
         });
       })
-      .catch(error => {});
+      .catch(error => {
+        this.setState({
+          redirect: true
+        });
+      });
   };
 
   addWordListHandler = () => {
@@ -39,7 +70,7 @@ class WordLists extends Component {
     formData.append("name", this.state.wordlist_name);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .post("/api/word/userwordlist/", formData, { headers })
+      .post("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", formData, { headers })
       .then(response => {
         if (response.status === 201) {
           this.setState({
@@ -47,7 +78,7 @@ class WordLists extends Component {
             success: true,
             message: "Successful word list create."
           });
-          this.getLists();
+          this.getClassWordList();
         }
       })
       .catch(error => {});
@@ -61,35 +92,34 @@ class WordLists extends Component {
   };
 
   render() {
+    if (this.state.redirect) {
+      return <Redirect to={"/teacher"} />;
+    }
+
     const wordlists = this.state.wordlists.map(wordlist => {
       return (
         <tr key={wordlist.id}>
           <td>{wordlist.name}</td>
           <td>{wordlist.date}</td>
           <td>{wordlist.total_words}</td>
+          <td>{String(wordlist.visibility)}</td>
           <td>
-            <Link to={{ pathname: "/word-lists/" + wordlist.id }}>
+            {/* /api/word/classroom/{pk}/classwordlist/{pk}/classwords/ */}
+            {/* path="/teacher/:classroomID/word-lists/:wordlistID" */}
+            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + wordlist.id }}>
               <Button variant="secondary" block>
                 Manage
               </Button>
             </Link>
           </td>
           <td>
-            <Button variant="success" block>
-              Learn
-            </Button>
-          </td>
-          <td>
             <Link
               to={{
-                pathname: "/word-lists/" + wordlist.id + "/test",
-                state: {
-                  wordlist_name: wordlist.name
-                }
+                pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + wordlist.id + "/create-test"
               }}
             >
               <Button variant="primary" block>
-                Test
+                Create Test
               </Button>
             </Link>
           </td>
@@ -108,13 +138,27 @@ class WordLists extends Component {
         </h1>
 
         <Breadcrumb>
+          <LinkContainer
+            to={{
+              pathname: "/teacher/"
+            }}
+          >
+            <BreadcrumbItem>Teacher</BreadcrumbItem>
+          </LinkContainer>
+          <LinkContainer
+            to={{
+              pathname: "/teacher/" + this.state.classroom_id
+            }}
+          >
+            <BreadcrumbItem>{this.state.classroom_name}</BreadcrumbItem>
+          </LinkContainer>
           <BreadcrumbItem active>Word lists</BreadcrumbItem>
         </Breadcrumb>
 
         <Wrapper>
           <Form>
             <h5>Create word list</h5>
-            <Form.Group controlId="WordLists.Title">
+            <Form.Group controlId="TeacherWordLists.Title">
               <Form.Row>
                 <Col xl={10} lg={9} md={9} sm={8} xs={8}>
                   <Form.Control
@@ -143,6 +187,7 @@ class WordLists extends Component {
                 <th>Name</th>
                 <th>Created</th>
                 <th>Total words</th>
+                <th>Visible</th>
               </tr>
             </thead>
             <tbody>{wordlists}</tbody>
@@ -153,4 +198,4 @@ class WordLists extends Component {
   }
 }
 
-export default withErrorHandler(WordLists, axios);
+export default withErrorHandler(TeacherWordLists, axios);

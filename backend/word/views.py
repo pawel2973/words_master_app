@@ -7,10 +7,19 @@ from rest_framework import status
 
 from core.models import User, UserWordList, UserWord, UserTest, UserTestAnswer, \
     ClassWordList, ClassWord, Classroom, ClassTest, StudentTest, StudentTestAnswer, \
-    Teacher, TeacherApplication
+    Teacher, TeacherApplication, RatingSystem, ClassTest
 
 from word import serializers
 
+
+# /word/user/
+class UserView(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.UserSerializer
+    queryset = User.objects.all()
+    
 
 # class SampleViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
 # /word/userwordlist/
@@ -87,7 +96,7 @@ class UserWordView(viewsets.ModelViewSet):
         if self.request.user != User.objects.get(id=wordlist.user.id):
             return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            queryset = UserWord.objects.filter(userwordlist=self.kwargs['nested_1_pk'], user=self.request.user)
+            queryset = UserWord.objects.filter(userwordlist=self.kwargs['nested_1_pk'], user=self.request.user).order_by('polish')
             page = self.paginate_queryset(queryset)
             if page is not None:
                 serializer = self.get_serializer(page, many=True)
@@ -144,7 +153,7 @@ class UserTestView(viewsets.ModelViewSet):
 
 
 # /word/userwordlist/{pk}/tests/{pk}/answers/
-# DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}
+# DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}/
 class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Manage user test answer in the database"""
     authentication_classes = (TokenAuthentication,)
@@ -199,17 +208,30 @@ class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewset
             return Response(serializer.data)
 
 
-# /word/userwordlist/teacher/
+# /word/teacher/
 class TeacherView(mixins.ListModelMixin, viewsets.GenericViewSet):
     """Manage user test in the database"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.TeacherSerializer
-    queryset = Teacher.objects.all()
+    queryset = Teacher.objects.all() # ATTA
 
-# /word/userwordlist/teacherapplication/
+    def list(self, request, *args, **kwargs):
+        try:
+            query = Teacher.objects.all()
+        except Teacher.DoesNotExist:
+            query = None
+
+        page = self.paginate_queryset(query)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(query, many=True)
+        return Response(serializer.data)
 
 
+# /word/teacherapplication/
 class TeacherApplicationView(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     """Manage user word list in the database"""
     authentication_classes = (TokenAuthentication,)
@@ -221,11 +243,9 @@ class TeacherApplicationView(mixins.CreateModelMixin, mixins.ListModelMixin, vie
         """Create a new word list"""
         serializer.save(user=self.request.user)
 
-# TODO: edit
-# /word/userwordlist/{pk}/tests/
-# /word/userwordlist/{pk}/tests/{pk}/
 
-
+# /word/classroom/
+# /word/classroom/{pk}/
 class ClassroomView(viewsets.ModelViewSet):
     """Manage user test in the database"""
     authentication_classes = (TokenAuthentication,)
@@ -235,7 +255,6 @@ class ClassroomView(viewsets.ModelViewSet):
 
     def create(self, serializer, *args, **kwargs):
         """Create a new classrom by teacher"""
-        teacher = None
         try:
             teacher = Teacher.objects.get(user=self.request.user)
         except Teacher.DoesNotExist:
@@ -258,8 +277,12 @@ class ClassroomView(viewsets.ModelViewSet):
         serializer.save(teacher=teacher)
 
     def list(self, request, *args, **kwargs):
-        teacher = Teacher.objects.get(user=self.request.user)
-        queryset = Classroom.objects.filter(teacher=teacher).order_by('name')
+        try:
+            teacher = Teacher.objects.get(user=self.request.user)
+            queryset = Classroom.objects.filter(teacher=teacher).order_by('name')
+        except Teacher.DoesNotExist:
+            queryset = None
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -269,18 +292,44 @@ class ClassroomView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# /word/userwordlist/{pk}/tests/
-# /word/userwordlist/{pk}/tests/{pk}/
+# /word/classroom/{pk}/classwordlist/
+# /word/classroom/{pk}/classwordlist/{pk}/
 class ClassWordListView(viewsets.ModelViewSet):
     """Manage user test in the database"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.ClassWordList
+    serializer_class = serializers.ClassWordListSerializer
     queryset = ClassWordList.objects.all()
 
+    def perform_create(self, serializer):
+        """Create a new word list"""
+        teacher = Teacher.objects.get(user=self.request.user)
+        classroom = Classroom.objects.get(teacher=teacher)   
+        serializer.save(teacher=teacher, classroom=classroom)
 
-# /word/userwordlist/{pk}/tests/
-# /word/userwordlist/{pk}/tests/{pk}/
+    def list(self, request, *args, **kwargs):
+        """Get teacher"""
+        classroom = Classroom.objects.get(id=self.kwargs['nested_1_pk'])   
+
+        """Show all word list for specific classroom"""
+        queryset = ClassWordList.objects.filter(classroom=classroom).order_by('-date')
+        # queryset = UserWord.objects.filter(userwordlist=self.kwargs['nested_1_pk'])
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+       
+
+
+
+
+# /word/classroom/{pk}/classwordlist/{pk}/classwords/
+# /word/classroom/{pk}/classwordlist/{pk}/classwords/{pk}/
 class ClassWordView(viewsets.ModelViewSet):
     """Manage user test in the database"""
     authentication_classes = (TokenAuthentication,)
@@ -288,86 +337,68 @@ class ClassWordView(viewsets.ModelViewSet):
     serializer_class = serializers.ClassWordSerializer
     queryset = ClassWord.objects.all()
 
-    # def list(self, request, *args, **kwargs):
-    #     words = UserWord.objects.filter(userwordlist=1)
-    #     result = self.filter_queryset(self.get_queryset())
+    def perform_create(self, serializer):
+        """Create a new word list"""
+        teacher = Teacher.objects.get(user=self.request.user)
+        classwordlist = ClassWordList.objects.get(id=self.kwargs['nested_2_pk'])   
+        serializer.save(teacher=teacher, classwordlist=classwordlist)
 
-    #     serializer = serializer_class.UserWordSerializer(result, many=True)
-    #     return Response(result)
+    def list(self, request, *args, **kwargs):
+        """Show all words for specific word list"""
+        classwordlist = ClassWordList.objects.get(id=self.kwargs['nested_2_pk'])
+        classroom = Classroom.objects.get(id=classwordlist.classroom.id)
+        students = classroom.students.all()
+        user = self.request.user        
+        access = False
 
+        try:
+            teacher = Teacher.objects.get(user=self.request.user)
+            access = True
+        except Teacher.DoesNotExist:
+            access = False
 
-# class TagViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
-#     """Manage tags in the database"""
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated, IsAdminUser)
-#     queryset = Tag.objects.all()
-#     serializer_class = serializers.TagSerializer
+        for student in students:
+            if student == user:
+                access = True          
 
-#     def get_queryset(self):
-#         """Return objects for the current authenticated user only"""
-#         return self.queryset.filter(user=self.request.user).order_by('-name')
+        # Check who is the owner of the list
+        if access == False:
+            return Response({'error': 'Brak dostępu!'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            queryset = ClassWord.objects.filter(classwordlist=self.kwargs['nested_2_pk']).order_by('polish')
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
 
-#     def perform_create(self, serializer):
-#       """Create a new ingredient"""
-#       serializer.save(user=self.request.user)
-
-
-# class UserWordListView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin):
-#     """Manage user word list in the database"""
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-#     queryset = UserWordList.objects.all()
-#     serializer_class = serializers.UserWordListSerializer
-
-#     def get_queryset(self):
-#         """Return objects for the current authenticated user only"""
-#         return self.queryset.filter(user=self.request.user).order_by('-name')
-
-#     def get_object(self):
-#         words = UserWord.objects.all().filter(userwordlist = 1)
-#         serializer = serializers.UserWordSerializer(words)
-#         print("dadadadad")
-#         print (serializer.data)
-#         return Response(serializer.data)
-
-#     def perform_create(self, serializer):
-#         """Create a new word list"""
-#         serializer.save(user=self.request.user)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
 
 
-# class UserWordListView(viewsets.ViewSet):
-#     """Manage user word list in the database"""
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = serializers.UserWordListSerializer
+class RatingSystemView(viewsets.ModelViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.RatingSystemSerializer
+    queryset = RatingSystem.objects.all()
 
-#     def list(self, request,):
-#         queryset = UserWordList.objects.filter(user=self.request.user).order_by('-name')
-#         serializer = UserWordListSerializer(queryset, many=True)
-#         return Response(serializer.data)
+    def perform_create(self, serializer):
+        """Create a new word list"""
+        teacher = Teacher.objects.get(user=self.request.user)
+        serializer.save(teacher=teacher)
 
-#     def get_object(self):
-#         words = UserWord.objects.all().filter(userwordlist = 1)
-#         serializer = serializers.UserWordSerializer(words)
-#         print("dadadadad")
-#         print (serializer.data)
-#         return Response(serializer.data)
 
-#     def perform_create(self, serializer):
-#         """Create a new word list"""
-#         serializer.save(user=self.request.user)
+class ClassTestView(viewsets.ModelViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.ClassTestSerializer
+    queryset = ClassTest.objects.all()
 
-# class UserWordView(viewsets.ModelViewSet):
+    def perform_create(self, serializer):
+        """Create a new word list"""
+        teacher = Teacher.objects.get(user=self.request.user)
+        classwordlist = ClassWordList.objects.get(id=self.kwargs['nested_2_pk'])
+        serializer.save(classwordlist=classwordlist, teacher=teacher)
 
-#     """Manage user word in the database"""
-#     authentication_classes = (TokenAuthentication,)
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = serializers.UserWordSerializer
-
-#     def get_queryset(self):
-#         """Return objects for the current authenticated user only"""
-#         return UserWord.objects.filter(userwordlist = 1)
-
-#     def perform_create(self, serializer):
-#         """Create a new word list"""
-#         serializer.save(userwordlist = 1)
+    # /api/word/classroom/{pk}/classwordlist/{pk}/classtests/
