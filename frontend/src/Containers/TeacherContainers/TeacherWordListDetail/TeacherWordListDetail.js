@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import axios from "../../axios";
+import axios from "../../../axios";
 import { Button, Row, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import classes from "./TeacherWordListDetail.module.css";
-import Wrapper from "../../Components/UI/Wrapper/Wrapper";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import { Redirect } from "react-router-dom";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import happyLogo from "../../Assets/happy.png";
-import Modal from "../../Components/UI/Modal/Modal";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import happyLogo from "../../../Assets/happy.png";
+import Modal from "../../../Components/UI/Modal/Modal";
 import { LinkContainer } from "react-router-bootstrap";
 
 class TeacherWordListDetail extends Component {

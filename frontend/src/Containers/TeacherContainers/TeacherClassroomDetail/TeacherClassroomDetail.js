@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import axios from "../../axios";
+import axios from "../../../axios";
 import { Button, Row, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../Components/UI/Wrapper/Wrapper";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import { Redirect } from "react-router-dom";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import happyLogo from "../../Assets/happy.png";
-import errorLogo from "../../Assets/error.png";
-import Modal from "../../Components/UI/Modal/Modal";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import happyLogo from "../../../Assets/happy.png";
+import errorLogo from "../../../Assets/error.png";
+import Modal from "../../../Components/UI/Modal/Modal";
 import { LinkContainer } from "react-router-bootstrap";
 import { Link } from "react-router-dom";
 

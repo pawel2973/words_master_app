@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import axios from "../../axios";
+import axios from "../../../axios";
 import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../Components/UI/Wrapper/Wrapper";
-import Modal from "../../Components/UI/Modal/Modal";
-import happyLogo from "../../Assets/happy.png";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../../Components/UI/Modal/Modal";
+import happyLogo from "../../../Assets/happy.png";
 import { Link } from "react-router-dom";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
 class WordLists extends Component {
   state = {

@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Redirect } from "react-router";
 import { Button, Col, Row, Jumbotron } from "react-bootstrap";
 import classes from "./Start.module.css";
-import axios from "../../axios";
+import axios from "../../../axios";
 
 class Start extends Component {
   state = {

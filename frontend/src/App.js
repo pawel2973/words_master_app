@@ -2,16 +2,16 @@ import React, { Component, Fragment } from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import Layout from "./hoc/Layout/Layout";
-import Start from "./Containers/Start/Start";
+import Start from "./Containers/UserContainers/Start/Start";
 // import Wall from "./Containers/Wall/Wall";
 // import CreatePost from "./Containers/CreatePost/CreatePost";
 // import GoFishing from "./Containers/GoFishing/GoFishing";
 
-import Teacher from "./Containers/Teacher/Teacher";
-import TeacherClassroomDetail from "./Containers/TeacherClassroomDetail/TeacherClassroomDetail";
-import TeacherWordLists from "./Containers/TeacherWordLists/TeacherWordLists";
+import Teacher from "./Containers/TeacherContainers/Teacher/Teacher";
+import TeacherClassroomDetail from "./Containers/TeacherContainers/TeacherClassroomDetail/TeacherClassroomDetail";
+import TeacherWordLists from "./Containers/TeacherContainers/TeacherWordLists/TeacherWordLists";
 import FindPeople from "./Containers/FindPeople/FindPeople";
-import Settings from "./Containers/Settings/Settings";
+import Settings from "./Containers/UserContainers/Settings/Settings";
 import LoginForm from "./Components/Authentication/Login/LoginForm";
 import Modal from "./Components/UI/Modal/Modal";
 import SignupForm from "./Components/Authentication/Signup/SignupForm";
@@ -22,17 +22,17 @@ import withErrorHandler from "./hoc/withErrorHandler/withErrorHandler";
 import PrivateRoute from "./hoc/PrivateRoute/PrivateRoute";
 import PublicRoute from "./hoc/PublicRoute/PublicRoute";
 import SignupRoute from "./hoc/SignupRoute/SignupRoute";
-import TestAnswers from "./Containers/TestAnswers/TestAnswers";
+import TestAnswers from "./Containers/UserContainers/TestAnswers/TestAnswers";
 import happyLogo from "./Assets/happy.png";
-import WordLists from "./Containers/WordLists/WordLists";
-import WordListDetail from "./Containers/WordListDetail/WordListDetail";
-import Test from "./Containers/Test/Test";
-import TeacherWordListDetail from "./Containers/TeacherWordListDetail/TeacherWordListDetail";
-import CreateTest from "./Containers/CreateTest/CreateTest";
-import TeacherTests from "./Containers/TeacherTests/TeacherTests";
+import WordLists from "./Containers/UserContainers/WordLists/WordLists";
+import WordListDetail from "./Containers/UserContainers/WordListDetail/WordListDetail";
+import Test from "./Containers/UserContainers/Test/Test";
+import TeacherWordListDetail from "./Containers/TeacherContainers/TeacherWordListDetail/TeacherWordListDetail";
+import CreateTest from "./Containers/TeacherContainers/CreateTest/CreateTest";
+import TeacherTests from "./Containers/TeacherContainers/TeacherTests/TeacherTests";
 
-import Classrooms from "./Containers/StudentContainers/Classrooms/Classrooms";
-import ClassroomDetails from "./Containers/StudentContainers/ClassroomDetails/ClassroomDetails";
+import Classrooms from "./Containers/ClassroomContainers/Classrooms/Classrooms";
+import ClassroomDetails from "./Containers/ClassroomContainers/ClassroomDetails/ClassroomDetails";
 
 class App extends Component {
   state = {

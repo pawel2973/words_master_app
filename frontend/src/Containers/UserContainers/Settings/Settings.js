@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Wrapper from "../../Components/UI/Wrapper/Wrapper";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import { Button, Col, Form } from "react-bootstrap";
 import classes from "./Settings.module.css";
 import axios from "axios";

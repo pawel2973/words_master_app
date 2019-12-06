@@ -1,13 +1,12 @@
 import React, { Component } from "react";
-import axios from "../../axios";
-import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../Components/UI/Wrapper/Wrapper";
-import Modal from "../../Components/UI/Modal/Modal";
-import happyLogo from "../../Assets/happy.png";
+import axios from "../../../axios";
+import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../../Components/UI/Modal/Modal";
+import happyLogo from "../../../Assets/happy.png";
 import { Link } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import { Redirect } from "react-router-dom";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
 class TeacherTest extends Component {
   state = {

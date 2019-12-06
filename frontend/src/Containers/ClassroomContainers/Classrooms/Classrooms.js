@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import classes from "./Classrooms.module.css";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import Modal from "../../../Components/UI/Modal/Modal";
-import happyLogo from "../../../Assets/happy.png";
 import { Link } from "react-router-dom";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
