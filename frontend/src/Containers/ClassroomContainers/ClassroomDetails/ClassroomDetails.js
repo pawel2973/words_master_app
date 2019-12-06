@@ -60,7 +60,7 @@ class ClassroomDetail extends Component {
           <h5>Manage your classroom</h5>
           <Row>
             <Col>
-              <Link to={{ pathname: "/classroom/" + this.state.classroom_id + "/word-lists" }}>
+              <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/word-lists" }}>
                 <Button variant="primary" block>
                   Word lists
                 </Button>
@@ -68,7 +68,7 @@ class ClassroomDetail extends Component {
             </Col>
 
             <Col>
-              <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/teacher-tests" }}>
+              <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/tests" }}>
                 <Button variant="secondary" block>
                   Tests
                 </Button>

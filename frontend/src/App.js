@@ -33,6 +33,9 @@ import TeacherTests from "./Containers/TeacherContainers/TeacherTests/TeacherTes
 
 import Classrooms from "./Containers/ClassroomContainers/Classrooms/Classrooms";
 import ClassroomDetails from "./Containers/ClassroomContainers/ClassroomDetails/ClassroomDetails";
+import ClassroomWordList from "./Containers/ClassroomContainers/ClassroomWordList/ClassroomWordList";
+import ClassroomWordListDetail from "./Containers/ClassroomContainers/ClassroomWordListDetail/ClassroomWordListDetail";
+import ClassroomTests from "./Containers/ClassroomContainers/ClassroomTests/ClassroomTests";
 
 class App extends Component {
   state = {
@@ -276,7 +279,23 @@ class App extends Component {
             <PrivateRoute
               exact
               path="/classrooms/:classroomID/word-lists"
-              component={TeacherWordLists}
+              component={ClassroomWordList}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms/:classroomID/word-lists/:wordlistID"
+              component={ClassroomWordListDetail}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms/:classroomID/tests"
+              component={ClassroomTests}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
@@ -287,18 +306,21 @@ class App extends Component {
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
+
             <PrivateRoute
               path="/profile-settings"
               component={Settings}
               logged_in={this.state.logged_in}
               updateProfileHandler={this.updateProfileHandler}
             />
+
             <PublicRoute
               path="/login"
               component={LoginForm}
               logged_in={this.state.logged_in}
               handle_login={this.handle_login}
             />
+
             <SignupRoute
               path="/signup"
               component={SignupForm}
