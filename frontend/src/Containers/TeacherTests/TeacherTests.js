@@ -13,17 +13,16 @@ class TeacherTest extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
     classroom_name: "",
-    teacher_id: "",
 
-    wordlists: [],
-    wordlist_name: "",
+    class_tests: [],
     success: false,
-    message: ""
+    message: "",
+    number_of_students: ""
   };
 
   componentDidMount() {
     this.getClassroom();
-    this.getClassWordList();
+    this.getClassTests();
   }
 
   getClassroom = () => {
@@ -36,7 +35,7 @@ class TeacherTest extends Component {
       .then(res => {
         this.setState({
           classroom_name: res.data.name,
-          teacher_id: res.data.teacher
+          number_of_students: res.data.students.length
         });
       })
       .catch(error => {
@@ -46,16 +45,16 @@ class TeacherTest extends Component {
       });
   };
 
-  getClassWordList = () => {
+  getClassTests = () => {
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", {
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classtests/", {
         headers: {
           Authorization: `Token ${localStorage.getItem("token")}`
         }
       })
       .then(res => {
         this.setState({
-          wordlists: res.data
+          class_tests: res.data
         });
       })
       .catch(error => {
@@ -65,20 +64,20 @@ class TeacherTest extends Component {
       });
   };
 
-  addWordListHandler = () => {
-    const formData = new FormData();
-    formData.append("name", this.state.wordlist_name);
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+  deleteTestHandler = (e, arr_id, test_id) => {
     axios
-      .post("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", formData, { headers })
+      .delete("/api/word/classroom/" + this.state.classroom_id + "/classtests/" + test_id + "/", {
+        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
+      })
       .then(response => {
-        if (response.status === 201) {
+        if (response.status === 204) {
+          const class_tests = [...this.state.class_tests];
+          class_tests.splice(arr_id, 1);
           this.setState({
-            wordlist_name: "",
+            class_tests: class_tests,
             success: true,
-            message: "Successful word list create."
+            message: "Successful test delete."
           });
-          this.getClassWordList();
         }
       })
       .catch(error => {});
@@ -92,36 +91,25 @@ class TeacherTest extends Component {
   };
 
   render() {
-    if (this.state.redirect) {
-      return <Redirect to={"/teacher"} />;
-    }
-
-    const wordlists = this.state.wordlists.map(wordlist => {
+    const class_tests = this.state.class_tests.map((class_test, index) => {
       return (
-        <tr key={wordlist.id}>
-          <td>{wordlist.name}</td>
-          <td>{wordlist.date}</td>
-          <td>{wordlist.total_words}</td>
-          <td>{String(wordlist.visibility)}</td>
+        <tr key={class_test.id}>
+          <td>{class_test.name}</td>
+          <td>{class_test.date}</td>
           <td>
-            {/* /api/word/classroom/{pk}/classwordlist/{pk}/classwords/ */}
-            {/* path="/teacher/:classroomID/word-lists/:wordlistID" */}
-            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + wordlist.id }}>
-              <Button variant="secondary" block>
-                Manage
+            {class_test.tests_resolved} / {this.state.number_of_students}
+          </td>
+          <td>
+            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + class_test.id }}>
+              <Button variant="primary" block>
+                details
               </Button>
             </Link>
           </td>
           <td>
-            <Link
-              to={{
-                pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + wordlist.id + "/create-test"
-              }}
-            >
-              <Button variant="primary" block>
-                Create Test
-              </Button>
-            </Link>
+            <Button variant="danger" block onClick={e => this.deleteTestHandler(e, index, class_test.id)}>
+              delete
+            </Button>
           </td>
         </tr>
       );
@@ -156,41 +144,17 @@ class TeacherTest extends Component {
         </Breadcrumb>
 
         <Wrapper>
-          <Form>
-            <h5>Create word list</h5>
-            <Form.Group controlId="TeacherTest.Title">
-              <Form.Row>
-                <Col xl={10} lg={9} md={9} sm={8} xs={8}>
-                  <Form.Control
-                    type="text"
-                    placeholder="word list name"
-                    value={this.state.wordlist_name}
-                    onChange={event => this.setState({ wordlist_name: event.target.value })}
-                  />
-                </Col>
-                <Col xl={2} lg={3} md={3} sm={4} xs={4}>
-                  <Button variant="primary" onClick={this.addWordListHandler} block>
-                    Create
-                  </Button>
-                </Col>
-              </Form.Row>
-            </Form.Group>
-          </Form>
-        </Wrapper>
-
-        <Wrapper>
-          <h5>Your word lists</h5>
+          <h5>Created tests</h5>
           <hr />
           <Table responsive striped bordered hover>
             <thead>
               <tr>
                 <th>Name</th>
                 <th>Created</th>
-                <th>Total words</th>
-                <th>Visible</th>
+                <th>Completed</th>
               </tr>
             </thead>
-            <tbody>{wordlists}</tbody>
+            <tbody>{class_tests}</tbody>
           </Table>
         </Wrapper>
       </Wrapper>

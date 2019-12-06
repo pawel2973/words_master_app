@@ -61,7 +61,8 @@ class CreateTest extends Component {
       })
       .then(res => {
         this.setState({
-          wordlist_name: res.data.name
+          wordlist_name: res.data.name,
+          test_name: "[TEST] " + res.data.name
         });
       })
       .catch(error => {

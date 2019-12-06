@@ -6,7 +6,7 @@ import Start from "./Containers/Start/Start";
 // import Wall from "./Containers/Wall/Wall";
 // import CreatePost from "./Containers/CreatePost/CreatePost";
 // import GoFishing from "./Containers/GoFishing/GoFishing";
-import Classroom from "./Containers/Classroom/Classroom";
+
 import Teacher from "./Containers/Teacher/Teacher";
 import TeacherClassroomDetail from "./Containers/TeacherClassroomDetail/TeacherClassroomDetail";
 import TeacherWordLists from "./Containers/TeacherWordLists/TeacherWordLists";
@@ -30,6 +30,9 @@ import Test from "./Containers/Test/Test";
 import TeacherWordListDetail from "./Containers/TeacherWordListDetail/TeacherWordListDetail";
 import CreateTest from "./Containers/CreateTest/CreateTest";
 import TeacherTests from "./Containers/TeacherTests/TeacherTests";
+
+import Classrooms from "./Containers/StudentContainers/Classrooms/Classrooms";
+import ClassroomDetails from "./Containers/StudentContainers/ClassroomDetails/ClassroomDetails";
 
 class App extends Component {
   state = {
@@ -212,12 +215,6 @@ class App extends Component {
               user_id={this.state.user_id}
             />
             <PrivateRoute
-              path="/classroom"
-              component={Classroom}
-              logged_in={this.state.logged_in}
-              user_id={this.state.user_id}
-            />
-            <PrivateRoute
               exact
               path="/teacher"
               component={Teacher}
@@ -256,6 +253,30 @@ class App extends Component {
               exact
               path="/teacher/:classroomID/word-lists/:wordlistID/create-test"
               component={CreateTest}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms"
+              component={Classrooms}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms/:classroomID"
+              component={ClassroomDetails}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms/:classroomID/word-lists"
+              component={TeacherWordLists}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

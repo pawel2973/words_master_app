@@ -177,6 +177,7 @@ class TeacherClassroomDetail extends Component {
     const students = this.state.students.map((student, index) => {
       return (
         <tr key={index}>
+          <td>{index + 1}</td>
           <td>
             {student.first_name} {student.last_name}
           </td>
@@ -269,6 +270,7 @@ class TeacherClassroomDetail extends Component {
           <Table responsive striped bordered hover>
             <thead>
               <tr>
+                <th>#</th>
                 <th>Name</th>
                 <th>Email</th>
               </tr>

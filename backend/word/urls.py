@@ -37,7 +37,7 @@ router.register('user', views.UserView, base_name='user')
 
 # /api/word/classroom/
 # /api/word/classroom/{pk}/
-router.register('classroom', views.ClassroomView, base_name='classroom')
+router.register('classroom', views.ClassroomTeacherView, base_name='classroom')
 
 # /api/word/classroom/{pk}/classwordlist/
 # /api/word/classroom/{pk}/classwordlist/{pk}/
@@ -59,6 +59,10 @@ classroom_rating_system_list_router.register('ratingsystem', views.RatingSystemV
 class_test_router = routers.NestedSimpleRouter(classroom_word_list_router, 'classwordlist')
 class_test_router.register('classtests', views.ClassTestView, base_name='classtests')
 
+# /api/word/classroom/{pk}/classtests/
+# /api/word/classroom/{pk}/classtests/{pk}/
+class_test_view_router = routers.NestedSimpleRouter(router, 'classroom')
+class_test_view_router.register('classtests', views.ClassTestView, base_name='classtests')
 
 ###############
 
@@ -75,6 +79,9 @@ class_test_router.register('classtests', views.ClassTestView, base_name='classte
 # /api/word/classroom/{pk}/classwordlist/{pk}/test/{pk}
 #########
 
+# /api/word/studentclassroom/
+# /api/word/studentclassroom/{pk}/
+router.register('studentclassroom', views.ClassroomStudentView, base_name='studentclassroom')
 
 
 
@@ -91,5 +98,6 @@ urlpatterns = [
     url('', include(classroom_word_list_router.urls)),
     url('', include(classroom_word_router.urls)),
     url('', include(classroom_rating_system_list_router.urls)),
-    url('', include(class_test_router.urls))
+    url('', include(class_test_router.urls)),
+    url('', include(class_test_view_router.urls))    
 ]

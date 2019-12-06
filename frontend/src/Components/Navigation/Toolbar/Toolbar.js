@@ -44,49 +44,24 @@ class Toolbar extends Component {
             Start
           </Nav.Link>
 
-          <Nav.Link
-            as={NavLink}
-            to="/word-lists"
-            exact={true}
-            activeStyle={{ color: "white" }}
-          >
+          <Nav.Link as={NavLink} to="/word-lists" exact={true} activeStyle={{ color: "white" }}>
             Word Lists
           </Nav.Link>
 
-          <Nav.Link
-            as={NavLink}
-            to="/classroom"
-            exact={true}
-            activeStyle={{ color: "white" }}
-          >
-            Classroom
+          <Nav.Link as={NavLink} to="/classrooms" exact={true} activeStyle={{ color: "white" }}>
+            Classrooms
           </Nav.Link>
 
-          <Nav.Link
-            as={NavLink}
-            to="/teacher"
-            exact={true}
-            activeStyle={{ color: "white" }}
-          >
+          <Nav.Link as={NavLink} to="/teacher" exact={true} activeStyle={{ color: "white" }}>
             Teacher
           </Nav.Link>
         </Nav>
         <Nav>
           <Nav.Link style={{ color: "white" }}>{this.props.email}</Nav.Link>
-          <Nav.Link
-            as={NavLink}
-            to="/followers"
-            exact={true}
-            activeStyle={{ color: "white" }}
-          >
+          <Nav.Link as={NavLink} to="/followers" exact={true} activeStyle={{ color: "white" }}>
             <i className="fas fa-smile" />
           </Nav.Link>
-          <Nav.Link
-            as={NavLink}
-            to="/profile-settings"
-            exact={true}
-            activeStyle={{ color: "white" }}
-          >
+          <Nav.Link as={NavLink} to="/profile-settings" exact={true} activeStyle={{ color: "white" }}>
             <i className="fas fa-user-cog" />
           </Nav.Link>
           <Nav.Link to="/login" onClick={this.props.handle_logout}>

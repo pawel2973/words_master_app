@@ -244,8 +244,10 @@ class StudentTest(models.Model):
     )
     classtest = models.ForeignKey(
         ClassTest,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="studenttest"
     )
+
 
 
 class StudentTestAnswer(models.Model):
