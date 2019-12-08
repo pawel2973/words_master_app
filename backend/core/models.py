@@ -248,8 +248,6 @@ class StudentTest(models.Model):
         related_name="studenttest"
     )
 
-
-
 class StudentTestAnswer(models.Model):
     """Answers to the student test"""
     polish = models.CharField(max_length=255)

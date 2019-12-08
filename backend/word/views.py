@@ -429,3 +429,43 @@ class ClassroomStudentView(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+# /word/userwordlist/{pk}/tests/
+# /word/userwordlist/{pk}/tests/{pk}/
+class StudentTestView(viewsets.ModelViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = serializers.StudentTestSerializer
+    queryset = StudentTest.objects.all()
+
+    def perform_create(self, serializer, *args, **kwargs):
+        """Save user test to database"""
+        classtest = ClassTest.objects.get(pk=self.kwargs['nested_2_pk'])
+        serializer.save(user=self.request.user, classtest=classtest)
+
+
+# /word/userwordlist/{pk}/tests/{pk}/answers/
+# DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}/
+class StudentTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """Manage user test answer in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = serializers.StudentTestAnswerSerializer
+    queryset = StudentTestAnswer.objects.all()
+
+    def perform_create(self, serializer, *args, **kwargs):
+        """Save student test to database"""
+        studenttest = StudentTest.objects.get(pk=self.kwargs['nested_3_pk'])
+        serializer.save(user=self.request.user, studenttest=studenttest)
+
+    def get_serializer(self, *args, **kwargs):
+        """Provide post multiple objects to database"""
+        if "data" in kwargs:
+            data = kwargs["data"]
+
+            # check if many is required
+            if isinstance(data, list):
+                kwargs["many"] = True
+
+        return super(StudentTestAnswerView, self).get_serializer(*args, **kwargs)

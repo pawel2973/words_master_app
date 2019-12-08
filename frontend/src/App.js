@@ -3,14 +3,10 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import Layout from "./hoc/Layout/Layout";
 import Start from "./Containers/UserContainers/Start/Start";
-// import Wall from "./Containers/Wall/Wall";
-// import CreatePost from "./Containers/CreatePost/CreatePost";
-// import GoFishing from "./Containers/GoFishing/GoFishing";
 
 import Teacher from "./Containers/TeacherContainers/Teacher/Teacher";
 import TeacherClassroomDetail from "./Containers/TeacherContainers/TeacherClassroomDetail/TeacherClassroomDetail";
 import TeacherWordLists from "./Containers/TeacherContainers/TeacherWordLists/TeacherWordLists";
-import FindPeople from "./Containers/FindPeople/FindPeople";
 import Settings from "./Containers/UserContainers/Settings/Settings";
 import LoginForm from "./Components/Authentication/Login/LoginForm";
 import Modal from "./Components/UI/Modal/Modal";
@@ -36,6 +32,7 @@ import ClassroomDetails from "./Containers/ClassroomContainers/ClassroomDetails/
 import ClassroomWordList from "./Containers/ClassroomContainers/ClassroomWordList/ClassroomWordList";
 import ClassroomWordListDetail from "./Containers/ClassroomContainers/ClassroomWordListDetail/ClassroomWordListDetail";
 import ClassroomTests from "./Containers/ClassroomContainers/ClassroomTests/ClassroomTests";
+import ClassroomTest from "./Containers/ClassroomContainers/ClassroomTest/ClassroomTest";
 
 class App extends Component {
   state = {
@@ -301,8 +298,9 @@ class App extends Component {
             />
 
             <PrivateRoute
-              path="/find-people"
-              component={FindPeople}
+              exact
+              path="/classrooms/:classroomID/tests/:testID"
+              component={ClassroomTest}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

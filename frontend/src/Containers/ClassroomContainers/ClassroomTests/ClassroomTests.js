@@ -63,25 +63,6 @@ class ClassroomTests extends Component {
       });
   };
 
-  deleteTestHandler = (e, arr_id, test_id) => {
-    axios
-      .delete("/api/word/classroom/" + this.state.classroom_id + "/classtests/" + test_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
-      .then(response => {
-        if (response.status === 204) {
-          const class_tests = [...this.state.class_tests];
-          class_tests.splice(arr_id, 1);
-          this.setState({
-            class_tests: class_tests,
-            success: true,
-            message: "Successful test delete."
-          });
-        }
-      })
-      .catch(error => {});
-  };
-
   successConfirmedHandler = () => {
     this.setState({
       success: false,
@@ -97,7 +78,7 @@ class ClassroomTests extends Component {
           <td>{class_test.date}</td>
           <td>YES / NO</td>
           <td>
-            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + class_test.id }}>
+            <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/tests/" + class_test.id }}>
               <Button variant="primary" block>
                 Start Test
               </Button>

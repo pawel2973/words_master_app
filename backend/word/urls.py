@@ -64,29 +64,29 @@ class_test_router.register('classtests', views.ClassTestView, base_name='classte
 class_test_view_router = routers.NestedSimpleRouter(router, 'classroom')
 class_test_view_router.register('classtests', views.ClassTestView, base_name='classtests')
 
-###############
 
-# /api/word/classroom/{pk}/classwordlist/{pk}/classtests/{pk}/studenttest/
-# /api/word/classroom/{pk}/classwordlist/{pk}/classtests/{pk}/studenttest/{pk}/
+# /api/word/classroom/{pk}/classtests/{pk}/studenttest/
+# /api/word/classroom/{pk}/classtests/{pk}/studenttest/{pk}/
 ###################
+student_test_view_router = routers.NestedSimpleRouter(class_test_view_router, 'classtests')
+student_test_view_router.register('studenttest', views.StudentTestView, base_name='studenttest')
 
-# /api/word/classroom/{pk}/classwordlist/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/
+
+# api/word/classroom/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/
+# api/word/classroom/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/{pk}
 ###################
+student_test_answer_view_router = routers.NestedSimpleRouter(student_test_view_router, 'studenttest')
+student_test_answer_view_router.register('studentanswers', views.StudentTestAnswerView, base_name='studentanswers')
 
-
-
-# /api/word/classroom/{pk}/classwordlist/{pk}/test/ 
-# /api/word/classroom/{pk}/classwordlist/{pk}/test/{pk}
-#########
 
 # /api/word/studentclassroom/
 # /api/word/studentclassroom/{pk}/
 router.register('studentclassroom', views.ClassroomStudentView, base_name='studentclassroom')
 
 
-
-
-
+# /api/word/classroom/{pk}/classwordlist/{pk}/test/ 
+# /api/word/classroom/{pk}/classwordlist/{pk}/test/{pk}
+#########
 
 app_name = 'word'
 
@@ -99,5 +99,8 @@ urlpatterns = [
     url('', include(classroom_word_router.urls)),
     url('', include(classroom_rating_system_list_router.urls)),
     url('', include(class_test_router.urls)),
-    url('', include(class_test_view_router.urls))    
+    url('', include(class_test_view_router.urls)),    
+    url('', include(student_test_view_router.urls)),    
+    url('', include(student_test_answer_view_router.urls))
+    
 ]

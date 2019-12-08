@@ -169,7 +169,7 @@ class StudentTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentTest
         fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest')
-        read_only_fields = ('id', 'date', 'grade', 'user', 'classtest')
+        read_only_fields = ('id', 'date', 'user', 'classtest')
 
     def to_representation(self, instance):
         representation = super(StudentTestSerializer, self).to_representation(instance)
@@ -183,4 +183,4 @@ class StudentTestAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentTestAnswer
         fields = ('id', 'polish', 'english', 'answer', 'correct', 'user', 'studenttest')
-        read_only_fields = ('id', 'usertest', 'user', 'studenttest')
+        read_only_fields = ('id', 'user', 'studenttest')
