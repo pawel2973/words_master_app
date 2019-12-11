@@ -230,6 +230,10 @@ class ClassTest(models.Model):
         ClassWordList,
         on_delete=models.CASCADE
     )
+    classroom = models.ForeignKey(
+        Classroom,
+        on_delete=models.CASCADE
+    )
 
 
 class StudentTest(models.Model):
