@@ -46,6 +46,7 @@ class ClassroomTestsResultsAnswers extends Component {
     axios
       .get("/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/" + this.state.test_id, { headers })
       .then(res => {
+        console.log(res.data);
         this.setState({
           test: res.data,
           test_name: res.data.classtest.name
@@ -60,6 +61,7 @@ class ClassroomTestsResultsAnswers extends Component {
           .catch(error => {});
       })
       .then(res => {
+        console.log(res.data);
         this.setState({
           answers: res.data
         });

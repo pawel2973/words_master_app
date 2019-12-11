@@ -514,6 +514,16 @@ class StudentClassroomShowTestAnswerView(mixins.ListModelMixin, mixins.CreateMod
 
         return super(StudentClassroomShowTestAnswerView, self).get_serializer(*args, **kwargs)
 
+    def list(self, request, *args, **kwargs):
+        """Show all answers for specific test"""  
+        answers = StudentTestAnswer.objects.filter(studenttest=self.kwargs['nested_2_pk'], user=self.request.user)
+        page = self.paginate_queryset(answers)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(answers, many=True)
+        return Response(serializer.data)
 
 # /word/userwordlist/{pk}/tests/{pk}/answers/
 # DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}/
@@ -539,3 +549,4 @@ class StudentTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, view
                 kwargs["many"] = True
 
         return super(StudentTestAnswerView, self).get_serializer(*args, **kwargs)
+
