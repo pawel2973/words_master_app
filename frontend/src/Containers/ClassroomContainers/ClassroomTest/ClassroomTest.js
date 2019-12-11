@@ -7,7 +7,7 @@ import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import happyLogo from "../../../Assets/happy.png";
 import Modal from "../../../Components/UI/Modal/Modal";
 import { LinkContainer } from "react-router-bootstrap";
-import { Link } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 class ClassroomTest extends Component {
   state = {
@@ -15,8 +15,6 @@ class ClassroomTest extends Component {
     tests: [],
     wordlist_id: "",
     wordlist_name: "",
-    wordlist_name_to_update: "",
-    success: false,
     message: "",
     error: false,
 
@@ -24,16 +22,13 @@ class ClassroomTest extends Component {
     test_id: this.props.match.params.testID,
     rating_system_id: "",
     classwordlist_id: "",
-    ratingsystem: {}
+    ratingsystem: {},
+    success_redirect: false
   };
 
   componentDidMount() {
     this.getClassroom();
     this.getTestDetails();
-
-    // this.getWordsList();
-    // this.getWordsfromList();
-    // this.getTests();
   }
 
   getClassroom = () => {
@@ -109,70 +104,6 @@ class ClassroomTest extends Component {
       .catch(error => {});
   };
 
-  getWordsList = () => {
-    axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
-      .then(res => {
-        this.setState({
-          wordlist_name: res.data.name,
-          wordlist_name_to_update: res.data.name
-        });
-      })
-      .catch(error => {});
-  };
-
-  getWordsfromList = () => {
-    axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/words/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
-      .then(res => {
-        const words = res.data.map(obj => ({ ...obj, answer: "" }));
-        this.setState({ words: words });
-      })
-      .catch(error => {});
-  };
-
-  getTests = () => {
-    axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
-      .then(res => {
-        this.setState({
-          tests: res.data
-        });
-      })
-      .catch(error => {});
-  };
-
-  deleteTestHandler = (e, arr_id, test_id) => {
-    axios
-      .delete("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + test_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
-      .then(res => {
-        if (res.status === 204) {
-          const tests = [...this.state.tests];
-          tests.splice(arr_id, 1);
-          this.setState({
-            tests: tests,
-            success: true,
-            message: "Successful test delete."
-          });
-        }
-      })
-      .catch(error => {});
-  };
-
   finshTestHandler = e => {
     // Check if answer is correct and add it to list
     e.preventDefault();
@@ -209,14 +140,12 @@ class ClassroomTest extends Component {
       grade = 5;
     }
 
-    console.log("gg" + grade);
-
-    // # /api/word/classroom/{pk}/classwordlist/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/
     //Create student test model in db
     const formTestData = new FormData();
     formTestData.append("correct_answers", correct_answers);
     formTestData.append("incorrect_answers", incorrect_answers);
     formTestData.append("grade", grade);
+    formTestData.append("classroom", this.state.classroom_id);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
       .post(
@@ -241,7 +170,9 @@ class ClassroomTest extends Component {
           .catch(error => {});
       })
       .then(res => {
-        console.log(res.data);
+        this.setState({
+          success_redirect: true
+        });
       })
       .catch(error => {});
   };
@@ -252,11 +183,17 @@ class ClassroomTest extends Component {
     this.setState({ words: words });
   };
 
-  successConfirmedHandler = () => {
-    this.setState({ success: false, message: "" });
-  };
-
   render() {
+    if (this.state.success_redirect) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/classrooms/" + this.state.classroom_id + "/tests-results"
+          }}
+        />
+      );
+    }
+
     const new_test = this.state.words.map((word, index) => {
       return (
         <tr key={word.id}>
@@ -276,11 +213,6 @@ class ClassroomTest extends Component {
 
     return (
       <Wrapper>
-        <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
-          <img src={happyLogo} alt="happy" />
-          {this.state.message}
-        </Modal>
-
         <h1>
           <i className="fas fa-trophy" /> {this.state.wordlist_name}
         </h1>

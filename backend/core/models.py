@@ -247,6 +247,10 @@ class StudentTest(models.Model):
         on_delete=models.CASCADE,
         related_name="studenttest"
     )
+    classroom = models.ForeignKey(
+        Classroom,
+        on_delete=models.CASCADE
+    )
 
 class StudentTestAnswer(models.Model):
     """Answers to the student test"""

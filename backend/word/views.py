@@ -322,11 +322,7 @@ class ClassWordListView(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
-       
-
-
-
+   
 
 # /word/classroom/{pk}/classwordlist/{pk}/classwords/
 # /word/classroom/{pk}/classwordlist/{pk}/classwords/{pk}/
@@ -403,8 +399,8 @@ class ClassTestView(viewsets.ModelViewSet):
 
     # /api/word/classroom/{pk}/classwordlist/{pk}/classtests/
 
-# STUDENT VIEWS
 
+# STUDENT VIEWS
 # /word/studentclassroom/
 # /word/studentclassroom/{pk}/
 class ClassroomStudentView(viewsets.ModelViewSet):
@@ -430,6 +426,7 @@ class ClassroomStudentView(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
 # /word/userwordlist/{pk}/tests/
 # /word/userwordlist/{pk}/tests/{pk}/
 class StudentTestView(viewsets.ModelViewSet):
@@ -443,6 +440,79 @@ class StudentTestView(viewsets.ModelViewSet):
         """Save user test to database"""
         classtest = ClassTest.objects.get(pk=self.kwargs['nested_2_pk'])
         serializer.save(user=self.request.user, classtest=classtest)
+
+
+class StudentClassroomTestView(viewsets.ModelViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = serializers.StudentTestSerializer
+    queryset = StudentTest.objects.all()
+    
+    # /api/word/classroom/{pk}/studenttests/
+    def list(self, request, *args, **kwargs):
+        classroom = Classroom.objects.get(pk=self.kwargs['nested_1_pk'])
+        try:
+            queryset = StudentTest.objects.filter(user=self.request.user, classroom=classroom)
+        except User.DoesNotExist:
+            queryset = None
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class StudentClassroomShowTestView(viewsets.ModelViewSet):
+    """Manage user test in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = serializers.StudentTestShowSerializer
+    queryset = StudentTest.objects.all()
+    
+    # /api/word/classroom/{pk}/studenttests/
+    def list(self, request, *args, **kwargs):
+        classroom = Classroom.objects.get(pk=self.kwargs['nested_1_pk'])
+        try:
+            queryset = StudentTest.objects.filter(user=self.request.user, classroom=classroom).order_by("-date")
+        except User.DoesNotExist:
+            queryset = None
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+# /word/userwordlist/{pk}/tests/{pk}/answers/
+# DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}/
+class StudentClassroomShowTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """Manage user test answer in the database"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = serializers.StudentTestAnswerSerializer
+    queryset = StudentTestAnswer.objects.all()
+
+    def perform_create(self, serializer, *args, **kwargs):
+        """Save student test to database"""
+        studenttest = StudentTest.objects.get(pk=self.kwargs['nested_2_pk'])
+        serializer.save(user=self.request.user, studenttest=studenttest)
+
+    def get_serializer(self, *args, **kwargs):
+        """Provide post multiple objects to database"""
+        if "data" in kwargs:
+            data = kwargs["data"]
+
+            # check if many is required
+            if isinstance(data, list):
+                kwargs["many"] = True
+
+        return super(StudentClassroomShowTestAnswerView, self).get_serializer(*args, **kwargs)
 
 
 # /word/userwordlist/{pk}/tests/{pk}/answers/

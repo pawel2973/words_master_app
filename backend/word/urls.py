@@ -72,6 +72,21 @@ student_test_view_router = routers.NestedSimpleRouter(class_test_view_router, 'c
 student_test_view_router.register('studenttest', views.StudentTestView, base_name='studenttest')
 
 
+# /api/word/classroom/{pk}/studenttests/
+student_classroom_test_view_router = routers.NestedSimpleRouter(router, 'classroom')
+student_classroom_test_view_router.register('studenttests', views.StudentClassroomTestView, base_name='studenttests')
+
+
+# /api/word/classroom/{pk}/studenttests/
+show_student_classroom_test_view_router = routers.NestedSimpleRouter(router, 'classroom')
+show_student_classroom_test_view_router.register('showstudenttests', views.StudentClassroomShowTestView, base_name='showstudenttests')
+
+
+# /api/word/classroom/{pk}/studenttests/
+show_student_classroom_test_answers_view_router = routers.NestedSimpleRouter(show_student_classroom_test_view_router, 'showstudenttests')
+show_student_classroom_test_answers_view_router.register('answers', views.StudentClassroomShowTestAnswerView, base_name='answers')
+
+
 # api/word/classroom/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/
 # api/word/classroom/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/{pk}
 ###################
@@ -101,6 +116,9 @@ urlpatterns = [
     url('', include(class_test_router.urls)),
     url('', include(class_test_view_router.urls)),    
     url('', include(student_test_view_router.urls)),    
-    url('', include(student_test_answer_view_router.urls))
+    url('', include(student_test_answer_view_router.urls)),
+    url('', include(student_classroom_test_view_router.urls)),
+    url('', include(show_student_classroom_test_view_router.urls)),
+    url('', include(show_student_classroom_test_answers_view_router.urls)),
     
 ]

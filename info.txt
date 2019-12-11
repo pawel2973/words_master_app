@@ -84,3 +84,6 @@ npm install react-bootstrap bootstrap --save
  
 5) To fix breadcrumb
 npm install -S react-router-bootstrap --save
+
+6) Wykresy
+npm install chart.js --save

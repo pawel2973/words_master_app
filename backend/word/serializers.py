@@ -94,6 +94,7 @@ class ClassroomSerializer(WritableNestedModelSerializer):
         fields = ('id', 'name', 'teacher', 'students')
         read_only_fields = ('id', 'teacher')
 
+
 class StudentClassroomSerializer(WritableNestedModelSerializer):
     """Serializer for classroom"""
     students = UserSerializer(many=True, required=False)
@@ -168,13 +169,28 @@ class StudentTestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentTest
-        fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest')
+        fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest', 'classroom')
         read_only_fields = ('id', 'date', 'user', 'classtest')
 
     def to_representation(self, instance):
         representation = super(StudentTestSerializer, self).to_representation(instance)
         representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
         return representation
+
+class StudentTestShowSerializer(serializers.ModelSerializer):
+    """Serializer for student test"""
+    classtest = ClassTestSerializer()
+    
+    class Meta:
+        model = StudentTest
+        fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest', 'classroom')
+        read_only_fields = ('id', 'date', 'user', 'classtest')
+
+    def to_representation(self, instance):
+        representation = super(StudentTestShowSerializer, self).to_representation(instance)
+        representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
+        return representation
+
 
 
 class StudentTestAnswerSerializer(serializers.ModelSerializer):

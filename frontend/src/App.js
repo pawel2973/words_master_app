@@ -33,6 +33,8 @@ import ClassroomWordList from "./Containers/ClassroomContainers/ClassroomWordLis
 import ClassroomWordListDetail from "./Containers/ClassroomContainers/ClassroomWordListDetail/ClassroomWordListDetail";
 import ClassroomTests from "./Containers/ClassroomContainers/ClassroomTests/ClassroomTests";
 import ClassroomTest from "./Containers/ClassroomContainers/ClassroomTest/ClassroomTest";
+import ClassroomTestsResults from "./Containers/ClassroomContainers/ClassroomTestsResults/ClassroomTestsResults";
+import ClassroomTestsResultsAnswers from "./Containers/ClassroomContainers/ClassroomTestsResultsAnswers/ClassroomTestsResultsAnswers";
 
 class App extends Component {
   state = {
@@ -301,6 +303,22 @@ class App extends Component {
               exact
               path="/classrooms/:classroomID/tests/:testID"
               component={ClassroomTest}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms/:classroomID/tests-results"
+              component={ClassroomTestsResults}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/classrooms/:classroomID/tests-results/:testID"
+              component={ClassroomTestsResultsAnswers}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

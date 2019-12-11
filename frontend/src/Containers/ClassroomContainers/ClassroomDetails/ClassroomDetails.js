@@ -6,15 +6,21 @@ import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import { LinkContainer } from "react-router-bootstrap";
 import { Link } from "react-router-dom";
+import { Line } from "react-chartjs-2";
 
 class ClassroomDetail extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
-    classroom_name: ""
+    classroom_name: "",
+    average_grade: 0,
+    tests: [],
+    grade_list: [],
+    labels_list: []
   };
 
   componentDidMount() {
     this.getClassroom();
+    this.getTestStatistics();
   }
 
   getClassroom = () => {
@@ -34,10 +40,104 @@ class ClassroomDetail extends Component {
       });
   };
 
+  getTestAndAnswers = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    axios
+      .get("/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/" + this.state.test_id, { headers })
+      .then(res => {
+        this.setState({
+          test: res.data,
+          test_name: res.data.classtest.name
+        });
+        return axios
+          .get(
+            "/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/" + this.state.test_id + "/answers/",
+            {
+              headers
+            }
+          )
+          .catch(error => {});
+      })
+      .then(res => {
+        this.setState({
+          answers: res.data
+        });
+      })
+      .catch(error => {});
+  };
+
+  getTestStatistics = () => {
+    let average_grade = 0;
+
+    axios
+      .get("/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/", {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`
+        }
+      })
+      .then(res => {
+        const tests = [...res.data];
+        const grade_list = [];
+        const labels_list = [];
+
+        tests.forEach(obj => {
+          average_grade += obj.grade;
+          grade_list.push(obj.grade);
+          labels_list.push(obj.date);
+        });
+
+        if (average_grade !== 0) {
+          average_grade = average_grade / tests.length;
+        } else {
+          average_grade = 0;
+        }
+
+        this.setState({
+          tests: res.data,
+          average_grade: average_grade,
+          grade_list: grade_list.reverse(),
+          labels_list: labels_list.reverse()
+        });
+      })
+      .catch(error => {
+        this.setState({
+          redirect: true
+        });
+      });
+    // console.log(average_grade);
+  };
+
   render() {
     if (this.state.redirect) {
       return <Redirect to={"/teacher/"} />;
     }
+
+    const data = {
+      labels: this.state.labels_list,
+      datasets: [
+        {
+          label: "Grades Chart",
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: "rgba(75,192,192,0.4)",
+          borderColor: "rgba(75,192,192,1)",
+          borderCapStyle: "butt",
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: "miter",
+          pointBorderColor: "rgba(75,192,192,1)",
+          pointBackgroundColor: "#fff",
+          pointBorderWidth: 1,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: "rgba(75,192,192,1)",
+          pointHoverBorderColor: "rgba(220,220,220,1)",
+          pointHoverBorderWidth: 2,
+          pointRadius: 1,
+          pointHitRadius: 10,
+          data: this.state.grade_list
+        }
+      ]
+    };
 
     return (
       <Wrapper>
@@ -57,7 +157,7 @@ class ClassroomDetail extends Component {
         </Breadcrumb>
 
         <Wrapper>
-          <h5>Manage your classroom</h5>
+          <h5>Explore your classroom</h5>
           <Row>
             <Col>
               <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/word-lists" }}>
@@ -76,20 +176,19 @@ class ClassroomDetail extends Component {
             </Col>
 
             <Col>
-              <Button variant="info" block>
-                Statistics
-              </Button>
+              <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/tests-results" }}>
+                <Button variant="info" block>
+                  Tests results
+                </Button>
+              </Link>
             </Col>
           </Row>
         </Wrapper>
 
         <Wrapper>
-          <h5>Statistics</h5>
+          <h5>Your grade-point average is: {Math.round(this.state.average_grade, 2).toFixed(2)}</h5>
           <hr />
-          <ul>
-            <li>Srednia ocen</li>
-            <li>Wykres</li>
-          </ul>
+          <Line data={data} />
         </Wrapper>
       </Wrapper>
     );
