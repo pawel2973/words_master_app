@@ -1,10 +1,10 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import classes from "./Classrooms.module.css";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Link } from "react-router-dom";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
 class Classroom extends Component {
   state = {
@@ -16,15 +16,13 @@ class Classroom extends Component {
   }
 
   getClasrooms = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/studentclassroom/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/studentclassroom/", { headers })
       .then(res => {
         this.setState({
-          classrooms: res.data
+          classrooms: [...res.data]
         });
       })
       .catch(error => {});

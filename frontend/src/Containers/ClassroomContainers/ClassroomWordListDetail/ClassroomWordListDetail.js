@@ -1,16 +1,16 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
+import { Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 
 class ClassroomWordListDetail extends Component {
   state = {
-    words: [],
-    wordlist_id: this.props.match.params.wordlistID,
+    class_wordlist_id: this.props.match.params.wordlistID,
     classroom_id: this.props.match.params.classroomID,
+    class_words: [],
     classroom_name: "",
     wordlist_name: "",
     redirect: false
@@ -18,17 +18,15 @@ class ClassroomWordListDetail extends Component {
 
   componentDidMount() {
     this.getClassroom();
-    this.getClassWordsList();
+    this.getClassWordList();
     this.getWordsfromList();
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
         this.setState({
           classroom_name: res.data.name
@@ -41,12 +39,12 @@ class ClassroomWordListDetail extends Component {
       });
   };
 
-  getClassWordsList = () => {
+  getClassWordList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.class_wordlist_id + "/", {
+        headers
       })
       .then(res => {
         this.setState({
@@ -61,17 +59,19 @@ class ClassroomWordListDetail extends Component {
   };
 
   getWordsfromList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .get(
-        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/classwords/",
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`
-          }
-        }
+        "/api/word/classroom/" +
+          this.state.classroom_id +
+          "/classwordlist/" +
+          this.state.class_wordlist_id +
+          "/classwords/",
+        { headers }
       )
       .then(res => {
-        this.setState({ words: res.data });
+        this.setState({ class_words: [...res.data] });
       })
       .catch(error => {});
   };
@@ -87,7 +87,7 @@ class ClassroomWordListDetail extends Component {
       );
     }
 
-    const words = this.state.words.map(word => {
+    const class_words = this.state.class_words.map(word => {
       return (
         <tr key={word.id}>
           <td>{word.polish}</td>
@@ -139,7 +139,7 @@ class ClassroomWordListDetail extends Component {
                 <th>English</th>
               </tr>
             </thead>
-            <tbody>{words}</tbody>
+            <tbody>{class_words}</tbody>
           </Table>
         </Wrapper>
       </Wrapper>

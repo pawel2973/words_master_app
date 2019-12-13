@@ -1,28 +1,20 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-// import classes from "./ClassroomTest.module.css";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import happyLogo from "../../../Assets/happy.png";
-import Modal from "../../../Components/UI/Modal/Modal";
-import { LinkContainer } from "react-router-bootstrap";
+import React, { Component } from "react";
+import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
+import { LinkContainer } from "react-router-bootstrap";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 
 class ClassroomTest extends Component {
   state = {
-    words: [],
-    tests: [],
-    wordlist_id: "",
-    wordlist_name: "",
-    message: "",
-    error: false,
-
     classroom_id: this.props.match.params.classroomID,
     test_id: this.props.match.params.testID,
-    rating_system_id: "",
-    classwordlist_id: "",
+    class_test_words: [],
     ratingsystem: {},
+    class_wordlist_id: "",
+    class_wordlist_name: "",
+    rating_system_id: "",
     success_redirect: false
   };
 
@@ -32,12 +24,10 @@ class ClassroomTest extends Component {
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
         this.setState({
           classroom_name: res.data.name,
@@ -53,14 +43,15 @@ class ClassroomTest extends Component {
 
   getTestDetails = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       // Get test information
       .get("/api/word/classroom/" + this.state.classroom_id + "/classtests/" + this.state.test_id + "/", { headers })
       .then(res => {
         this.setState({
           rating_system_id: res.data.ratingsystem,
-          classwordlist_id: res.data.classwordlist,
-          wordlist_name: res.data.name
+          class_wordlist_id: res.data.classwordlist,
+          class_wordlist_name: res.data.name
         });
 
         return (
@@ -70,13 +61,15 @@ class ClassroomTest extends Component {
               "/api/word/classroom/" +
                 this.state.classroom_id +
                 "/classwordlist/" +
-                this.state.classwordlist_id +
+                this.state.class_wordlist_id +
                 "/classwords/",
               { headers }
             )
             .then(res => {
-              const words = res.data.map(obj => ({ ...obj, answer: "" }));
-              this.setState({ words: words });
+              const class_test_words = res.data.map(obj => ({ ...obj, answer: "" }));
+              this.setState({
+                class_test_words: [...class_test_words]
+              });
               return (
                 axios
                   // Get rating system
@@ -92,7 +85,7 @@ class ClassroomTest extends Component {
                   )
                   .then(res => {
                     this.setState({
-                      ratingsystem: res.data
+                      ratingsystem: { ...res.data }
                     });
                   })
                   .catch(error => {})
@@ -105,11 +98,13 @@ class ClassroomTest extends Component {
   };
 
   finshTestHandler = e => {
-    // Check if answer is correct and add it to list
     e.preventDefault();
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     let correct_answers = 0;
     let incorrect_answers = 0;
-    const answers = [...this.state.words].map(obj => {
+
+    // Check if answer is correct and add it to list
+    const answers = [...this.state.class_test_words].map(obj => {
       if (obj.english === obj.answer) {
         correct_answers++;
         return {
@@ -146,10 +141,10 @@ class ClassroomTest extends Component {
     formTestData.append("incorrect_answers", incorrect_answers);
     formTestData.append("grade", grade);
     formTestData.append("classroom", this.state.classroom_id);
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .post(
-        "/api/word/classroom/" + this.state.classroom_id + "/classtests/" + this.state.test_id + "/studenttest/",
+        "/api/word/classroom/" + this.state.classroom_id + "/classtests/" + this.state.test_id + "/studenttestcreate/",
         formTestData,
         { headers }
       )
@@ -178,9 +173,9 @@ class ClassroomTest extends Component {
   };
 
   onUpdateWordHandler = (id, e) => {
-    const words = [...this.state.words];
+    const words = [...this.state.class_test_words];
     words[id].answer = e.target.value;
-    this.setState({ words: words });
+    this.setState({ class_test_words: words });
   };
 
   render() {
@@ -194,16 +189,16 @@ class ClassroomTest extends Component {
       );
     }
 
-    const new_test = this.state.words.map((word, index) => {
+    const new_test = this.state.class_test_words.map((word, index) => {
       return (
         <tr key={word.id}>
-          <td>{this.state.words[index].polish}</td>
+          <td>{this.state.class_test_words[index].polish}</td>
           <td>
             <Form.Control
               type="text"
               placeholder=""
               required
-              value={this.state.words[index].answer}
+              value={this.state.class_test_words[index].answer}
               onChange={this.onUpdateWordHandler.bind(this, index)}
             />
           </td>
@@ -214,7 +209,7 @@ class ClassroomTest extends Component {
     return (
       <Wrapper>
         <h1>
-          <i className="fas fa-trophy" /> {this.state.wordlist_name}
+          <i className="fas fa-trophy" /> {this.state.class_wordlist_name}
         </h1>
 
         <Breadcrumb>
@@ -239,11 +234,11 @@ class ClassroomTest extends Component {
           >
             <BreadcrumbItem>Tests</BreadcrumbItem>
           </LinkContainer>
-          <BreadcrumbItem active>{this.state.wordlist_name}</BreadcrumbItem>
+          <BreadcrumbItem active>{this.state.class_wordlist_name}</BreadcrumbItem>
         </Breadcrumb>
 
         <Wrapper>
-          <h5>Take the test</h5>
+          <h5>Complete the test</h5>
           <hr />
           <Form onSubmit={this.finshTestHandler}>
             <Table responsive striped bordered hover>

@@ -99,7 +99,7 @@ class TeacherTest extends Component {
             {class_test.tests_resolved} / {this.state.number_of_students}
           </td>
           <td>
-            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + class_test.id }}>
+            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/teacher-tests/" + class_test.id }}>
               <Button variant="primary" block>
                 details
               </Button>

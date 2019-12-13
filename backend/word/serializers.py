@@ -7,7 +7,7 @@ from core.models import UserWordList, UserWord, UserTest, UserTestAnswer, \
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for user word in user word list"""
+    """Serializer for user"""
 
     class Meta:
         model = User
@@ -17,7 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserWordListSerializer(serializers.ModelSerializer):
     """Serializer for user word list"""
-    # userword = serializers.StringRelatedField(many=True)
 
     total_words = serializers.SerializerMethodField(read_only=True)
 
@@ -77,7 +76,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
 
 class TeacherApplicationSerializer(serializers.ModelSerializer):
-    """Serializer for teacher"""
+    """Serializer for teacher application"""
 
     class Meta:
         model = TeacherApplication
@@ -96,10 +95,9 @@ class ClassroomSerializer(WritableNestedModelSerializer):
 
 
 class StudentClassroomSerializer(WritableNestedModelSerializer):
-    """Serializer for classroom"""
+    """Serializer for student in classroom"""
     students = UserSerializer(many=True, required=False)
     teacher_details = UserSerializer(source='teacher.user')
-    # teacher = UserSerializer(many=False, required=False)
 
     class Meta:
         model = Classroom
@@ -107,7 +105,6 @@ class StudentClassroomSerializer(WritableNestedModelSerializer):
         read_only_fields = ('id', 'teacher', 'teacher_details')
 
 
-# TODO EDIT 
 class ClassWordListSerializer(serializers.ModelSerializer):
     """Serializer for class word list"""
 
@@ -155,9 +152,9 @@ class ClassTestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClassTest
-        fields = ('id', 'name', 'date', 'teacher', 'ratingsystem', 'classwordlist', 'tests_resolved')
+        fields = ('id', 'name', 'date', 'teacher', 'ratingsystem', 'classwordlist', 'tests_resolved', 'classroom')
         read_only_fields = ('id', 'teacher', 'classwordlist', 'tests_resolved')
-    
+
     def to_representation(self, instance):
         representation = super(ClassTestSerializer, self).to_representation(instance)
         representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
@@ -166,6 +163,8 @@ class ClassTestSerializer(serializers.ModelSerializer):
 
 class StudentTestSerializer(serializers.ModelSerializer):
     """Serializer for student test"""
+    user = UserSerializer()
+    classtest = ClassTestSerializer()
 
     class Meta:
         model = StudentTest
@@ -177,10 +176,18 @@ class StudentTestSerializer(serializers.ModelSerializer):
         representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
         return representation
 
+
+class StudentCreateTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentTest
+        fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest', 'classroom')
+        read_only_fields = ('id', 'date', 'user', 'classtest')
+
+
 class StudentTestShowSerializer(serializers.ModelSerializer):
     """Serializer for student test"""
     classtest = ClassTestSerializer()
-    
+
     class Meta:
         model = StudentTest
         fields = ('id', 'date', 'correct_answers', 'incorrect_answers', 'grade', 'user', 'classtest', 'classroom')
@@ -190,7 +197,6 @@ class StudentTestShowSerializer(serializers.ModelSerializer):
         representation = super(StudentTestShowSerializer, self).to_representation(instance)
         representation['date'] = instance.date.strftime("%Y-%m-%d %H:%M")
         return representation
-
 
 
 class StudentTestAnswerSerializer(serializers.ModelSerializer):

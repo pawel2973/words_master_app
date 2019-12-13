@@ -86,4 +86,4 @@ npm install react-bootstrap bootstrap --save
 npm install -S react-router-bootstrap --save
 
 6) Wykresy
-npm install chart.js --save
+npm install react-chartjs-2 chart.js --save

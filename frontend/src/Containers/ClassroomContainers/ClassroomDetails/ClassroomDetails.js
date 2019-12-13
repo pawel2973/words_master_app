@@ -1,37 +1,37 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect, Link } from "react-router-dom";
+import { LinkContainer } from "react-router-bootstrap";
 import { Button, Row, Col, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import { LinkContainer } from "react-router-bootstrap";
-import { Link } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 
 class ClassroomDetail extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
+    student_tests: [],
+    student_grade_list: [],
+    student_labels_list: [],
     classroom_name: "",
-    average_grade: 0,
-    tests: [],
-    grade_list: [],
-    labels_list: []
+    student_average_grade: 0,
+    redirect: false
   };
 
   componentDidMount() {
     this.getClassroom();
-    this.getTestStatistics();
+    this.getStudentTestStatistics();
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({ classroom_name: res.data.name });
+        this.setState({
+          classroom_name: res.data.name
+        });
       })
       .catch(error => {
         this.setState({
@@ -40,63 +40,34 @@ class ClassroomDetail extends Component {
       });
   };
 
-  getTestAndAnswers = () => {
+  getStudentTestStatistics = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
-    axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/" + this.state.test_id, { headers })
-      .then(res => {
-        this.setState({
-          test: res.data,
-          test_name: res.data.classtest.name
-        });
-        return axios
-          .get(
-            "/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/" + this.state.test_id + "/answers/",
-            {
-              headers
-            }
-          )
-          .catch(error => {});
-      })
-      .then(res => {
-        this.setState({
-          answers: res.data
-        });
-      })
-      .catch(error => {});
-  };
-
-  getTestStatistics = () => {
-    let average_grade = 0;
+    let student_average_grade = 0;
 
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/showstudenttests/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/studenttests/", { headers })
       .then(res => {
         const tests = [...res.data];
         const grade_list = [];
         const labels_list = [];
 
         tests.forEach(obj => {
-          average_grade += obj.grade;
+          student_average_grade += obj.grade;
           grade_list.push(obj.grade);
           labels_list.push(obj.date);
         });
 
-        if (average_grade !== 0) {
-          average_grade = average_grade / tests.length;
+        if (student_average_grade !== 0) {
+          student_average_grade = student_average_grade / tests.length;
         } else {
-          average_grade = 0;
+          student_average_grade = 0;
         }
 
         this.setState({
-          tests: res.data,
-          average_grade: average_grade,
-          grade_list: grade_list.reverse(),
-          labels_list: labels_list.reverse()
+          student_tests: [...tests],
+          student_average_grade: student_average_grade,
+          student_grade_list: [...grade_list.reverse()],
+          student_labels_list: [...labels_list.reverse()]
         });
       })
       .catch(error => {
@@ -104,7 +75,6 @@ class ClassroomDetail extends Component {
           redirect: true
         });
       });
-    // console.log(average_grade);
   };
 
   render() {
@@ -113,7 +83,7 @@ class ClassroomDetail extends Component {
     }
 
     const data = {
-      labels: this.state.labels_list,
+      labels: this.state.student_labels_list,
       datasets: [
         {
           label: "Grades Chart",
@@ -134,7 +104,7 @@ class ClassroomDetail extends Component {
           pointHoverBorderWidth: 2,
           pointRadius: 1,
           pointHitRadius: 10,
-          data: this.state.grade_list
+          data: this.state.student_grade_list
         }
       ]
     };
@@ -186,7 +156,7 @@ class ClassroomDetail extends Component {
         </Wrapper>
 
         <Wrapper>
-          <h5>Your grade-point average is: {Math.round(this.state.average_grade, 2).toFixed(2)}</h5>
+          <h5>Your grade-point average is: {Number(this.state.student_average_grade).toFixed(2)}</h5>
           <hr />
           <Line data={data} />
         </Wrapper>

@@ -183,9 +183,11 @@ class TeacherClassroomDetail extends Component {
           </td>
           <td>{student.email}</td>
           <td>
-            <Button variant="primary" block>
-              details
-            </Button>
+            <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/student/" + student.id }}>
+              <Button variant="primary" block>
+                details
+              </Button>
+            </Link>
           </td>
           <td>
             <Button variant="danger" block onClick={e => this.deleteStudentHandler(e, index)}>
@@ -254,12 +256,6 @@ class TeacherClassroomDetail extends Component {
                   Tests
                 </Button>
               </Link>
-            </Col>
-
-            <Col>
-              <Button variant="info" block>
-                Statistics
-              </Button>
             </Col>
           </Row>
         </Wrapper>

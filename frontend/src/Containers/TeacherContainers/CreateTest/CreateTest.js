@@ -107,6 +107,7 @@ class CreateTest extends Component {
             });
             const formData2 = new FormData();
             formData2.append("name", this.state.test_name);
+            formData2.append("classroom", this.state.classroom_id);
             formData2.append("ratingsystem", this.state.rating_system_id);
             return axios
               .post(

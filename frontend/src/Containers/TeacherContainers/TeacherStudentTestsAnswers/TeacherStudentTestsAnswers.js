@@ -6,15 +6,17 @@ import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import happyLogo from "../../../Assets/happy.png";
 import Modal from "../../../Components/UI/Modal/Modal";
 import { LinkContainer } from "react-router-bootstrap";
-import classes from "./ClassroomTestsResultsAnswers.module.css";
+import classes from "./TeacherStudentTestsAnswers.module.css";
 
-class ClassroomTestsResultsAnswers extends Component {
+class TeacherStudentTestsAnswers extends Component {
   state = {
     answers: [],
     test: {},
     classroom_id: this.props.match.params.classroomID,
     test_id: this.props.match.params.testID,
-    wordlist_name: ""
+    stud_test_id: this.props.match.params.studenttestID,
+    wordlist_name: "",
+    test_name: ""
   };
 
   componentDidMount() {
@@ -44,7 +46,17 @@ class ClassroomTestsResultsAnswers extends Component {
   getTestAndAnswers = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/studenttests/" + this.state.test_id, { headers })
+      // # api/word/classroom/{pk}/classtests/{pk}/studenttest/{pk}/studentanswers/
+      .get(
+        "/api/word/classroom/" +
+          this.state.classroom_id +
+          "/classtests/" +
+          this.state.test_id +
+          "/studenttest/" +
+          this.state.stud_test_id +
+          "/",
+        { headers }
+      )
       .then(res => {
         console.log(res.data);
         this.setState({
@@ -52,9 +64,18 @@ class ClassroomTestsResultsAnswers extends Component {
           test_name: res.data.classtest.name
         });
         return axios
-          .get("/api/word/classroom/" + this.state.classroom_id + "/studenttests/" + this.state.test_id + "/answers/", {
-            headers
-          })
+          .get(
+            "/api/word/classroom/" +
+              this.state.classroom_id +
+              "/classtests/" +
+              this.state.test_id +
+              "/studenttest/" +
+              this.state.stud_test_id +
+              "/studentanswers/",
+            {
+              headers
+            }
+          )
           .catch(error => {});
       })
       .then(res => {
@@ -62,6 +83,7 @@ class ClassroomTestsResultsAnswers extends Component {
         this.setState({
           answers: res.data
         });
+        console.log(this.state.answers);
       })
       .catch(error => {});
   };
@@ -72,6 +94,7 @@ class ClassroomTestsResultsAnswers extends Component {
 
   render() {
     const answers = this.state.answers.map((answer, index) => {
+      console.log("D");
       return (
         <tr key={answer.id} className={answer.correct ? classes.Correct : classes.Incorrect}>
           <td>{answer.polish}</td>
@@ -95,26 +118,35 @@ class ClassroomTestsResultsAnswers extends Component {
         <Breadcrumb>
           <LinkContainer
             to={{
-              pathname: "/classrooms/"
+              pathname: "/teacher/"
             }}
           >
-            <BreadcrumbItem>Classroom</BreadcrumbItem>
+            <BreadcrumbItem>Teacher</BreadcrumbItem>
           </LinkContainer>
           <LinkContainer
             to={{
-              pathname: "/classrooms/" + this.state.classroom_id
+              pathname: "/teacher/" + this.state.classroom_id
             }}
           >
             <BreadcrumbItem>{this.state.classroom_name}</BreadcrumbItem>
           </LinkContainer>
           <LinkContainer
             to={{
-              pathname: "/classrooms/" + this.state.classroom_id + "/tests-results"
+              pathname: "/teacher/" + this.state.classroom_id + "/teacher-tests"
             }}
           >
-            <BreadcrumbItem>Tests results</BreadcrumbItem>
+            <BreadcrumbItem>Tests</BreadcrumbItem>
           </LinkContainer>
-          <BreadcrumbItem active>{this.state.test_name}</BreadcrumbItem>
+
+          <LinkContainer
+            to={{
+              pathname: "/teacher/" + this.state.classroom_id + "/teacher-tests/" + this.state.test_id
+            }}
+          >
+            <BreadcrumbItem>{this.state.test_name}</BreadcrumbItem>
+          </LinkContainer>
+
+          <BreadcrumbItem active>Answers</BreadcrumbItem>
         </Breadcrumb>
 
         <Wrapper>
@@ -165,4 +197,4 @@ class ClassroomTestsResultsAnswers extends Component {
   }
 }
 
-export default withErrorHandler(ClassroomTestsResultsAnswers, axios);
+export default withErrorHandler(TeacherStudentTestsAnswers, axios);

@@ -21,7 +21,6 @@ import SignupRoute from "./hoc/SignupRoute/SignupRoute";
 import TestAnswers from "./Containers/UserContainers/TestAnswers/TestAnswers";
 import happyLogo from "./Assets/happy.png";
 import WordLists from "./Containers/UserContainers/WordLists/WordLists";
-import WordListDetail from "./Containers/UserContainers/WordListDetail/WordListDetail";
 import Test from "./Containers/UserContainers/Test/Test";
 import TeacherWordListDetail from "./Containers/TeacherContainers/TeacherWordListDetail/TeacherWordListDetail";
 import CreateTest from "./Containers/TeacherContainers/CreateTest/CreateTest";
@@ -31,10 +30,14 @@ import Classrooms from "./Containers/ClassroomContainers/Classrooms/Classrooms";
 import ClassroomDetails from "./Containers/ClassroomContainers/ClassroomDetails/ClassroomDetails";
 import ClassroomWordList from "./Containers/ClassroomContainers/ClassroomWordList/ClassroomWordList";
 import ClassroomWordListDetail from "./Containers/ClassroomContainers/ClassroomWordListDetail/ClassroomWordListDetail";
-import ClassroomTests from "./Containers/ClassroomContainers/ClassroomTests/ClassroomTests";
 import ClassroomTest from "./Containers/ClassroomContainers/ClassroomTest/ClassroomTest";
 import ClassroomTestsResults from "./Containers/ClassroomContainers/ClassroomTestsResults/ClassroomTestsResults";
 import ClassroomTestsResultsAnswers from "./Containers/ClassroomContainers/ClassroomTestsResultsAnswers/ClassroomTestsResultsAnswers";
+import TeacherTestDetails from "./Containers/TeacherContainers/TeacherTestDetails/TeacherTestDetails";
+import TeacherStudentTestsAnswers from "./Containers/TeacherContainers/TeacherStudentTestsAnswers/TeacherStudentTestsAnswers";
+import StudentStatistics from "./Containers/TeacherContainers/StudentStatististics/StudentStatistics";
+import WordListDetails from "./Containers/UserContainers/WordListDetails/WordListDetails";
+import ClassroomActiveTests from "./Containers/ClassroomContainers/ClassroomActiveTests/ClassroomActiveTests";
 
 class App extends Component {
   state = {
@@ -198,7 +201,7 @@ class App extends Component {
             <PrivateRoute
               exact
               path="/word-lists/:wordlistID"
-              component={WordListDetail}
+              component={WordListDetails}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
@@ -232,11 +235,34 @@ class App extends Component {
             />
             <PrivateRoute
               exact
+              path="/teacher/:classroomID/student/:studentID"
+              component={StudentStatistics}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
               path="/teacher/:classroomID/teacher-tests"
               component={TeacherTests}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID/teacher-tests/:testID"
+              component={TeacherTestDetails}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
+            <PrivateRoute
+              exact
+              path="/teacher/:classroomID/teacher-tests/:testID/:studenttestID"
+              component={TeacherStudentTestsAnswers}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+
             <PrivateRoute
               exact
               path="/teacher/:classroomID/word-lists"
@@ -294,7 +320,7 @@ class App extends Component {
             <PrivateRoute
               exact
               path="/classrooms/:classroomID/tests"
-              component={ClassroomTests}
+              component={ClassroomActiveTests}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

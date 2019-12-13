@@ -256,6 +256,7 @@ class StudentTest(models.Model):
         on_delete=models.CASCADE
     )
 
+
 class StudentTestAnswer(models.Model):
     """Answers to the student test"""
     polish = models.CharField(max_length=255)

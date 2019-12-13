@@ -1,104 +1,101 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-// import classes from "./Test.module.css";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import happyLogo from "../../../Assets/happy.png";
-import Modal from "../../../Components/UI/Modal/Modal";
-import { LinkContainer } from "react-router-bootstrap";
+import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import { LinkContainer } from "react-router-bootstrap";
+import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../../Components/UI/Modal/Modal";
+import happyLogo from "../../../Assets/happy.png";
 
 class Test extends Component {
   state = {
-    words: [],
-    tests: [],
     wordlist_id: this.props.match.params.wordlistID,
-    wordlist_name: "",
-    wordlist_name_to_update: "",
-    success: false,
+    user_tests: [],
+    user_words: [],
+    user_wordlist_name: "",
+    user_wordlist_name_to_update: "",
     message: "",
+    success: false,
     error: false
   };
 
   componentDidMount() {
-    this.getWordsList();
+    this.getUserWordsList();
     this.getWordsfromList();
-    this.getTests();
+    this.getUserTests();
   }
 
-  getWordsList = () => {
+  getUserWordsList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", { headers })
       .then(res => {
-        this.setState({
-          wordlist_name: res.data.name,
-          wordlist_name_to_update: res.data.name
-        });
+        if (res.status === 200) {
+          this.setState({
+            user_wordlist_name: res.data.name,
+            user_wordlist_name_to_update: res.data.name
+          });
+        }
       })
       .catch(error => {});
   };
 
   getWordsfromList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/words/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/words/", { headers })
       .then(res => {
-        const words = res.data.map(obj => ({ ...obj, answer: "" }));
-        this.setState({ words: words });
+        if (res.status === 200) {
+          const words = res.data.map(obj => ({ ...obj, answer: "" }));
+          this.setState({ user_words: words });
+        }
       })
       .catch(error => {});
   };
 
-  getTests = () => {
+  getUserTests = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", { headers })
       .then(res => {
-        this.setState({
-          tests: res.data
-        });
-        // console.log(res.data);
+        if (res.status === 200) {
+          this.setState({
+            user_tests: [...res.data]
+          });
+        }
       })
       .catch(error => {});
   };
 
   deleteTestHandler = (e, arr_id, test_id) => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .delete("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + test_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
-      .then(response => {
-        if (response.status === 204) {
-          const tests = [...this.state.tests];
+      .delete("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + test_id + "/", { headers })
+      .then(res => {
+        if (res.status === 204) {
+          const tests = [...this.state.user_tests];
           tests.splice(arr_id, 1);
           this.setState({
-            tests: tests,
+            user_tests: tests,
             success: true,
             message: "Successful test delete."
           });
         }
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch(error => {});
   };
 
   finshTestHandler = e => {
     // Check if answer is correct and add it to list
     let correct_answers = 0;
     let incorrect_answers = 0;
-    const answers = [...this.state.words].map(obj => {
+
+    const answers = [...this.state.user_words].map(obj => {
       if (obj.english === obj.answer) {
         correct_answers++;
         return {
@@ -122,41 +119,44 @@ class Test extends Component {
 
     axios
       .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", formTestData, { headers })
-      .then(response => {
+      .then(res => {
         //Save answers for test in db
         return axios
-          .post(
-            "/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + response.data.id + "/answers/",
-            answers,
-            { headers }
-          )
+          .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + res.data.id + "/answers/", answers, {
+            headers
+          })
           .catch(error => {});
       })
-      .then(response => {})
+      .then(res => {})
       .catch(error => {});
   };
 
   onUpdateWordHandler = (id, e) => {
-    const words = [...this.state.words];
+    const words = [...this.state.user_words];
     words[id].answer = e.target.value;
-    this.setState({ words: words });
+    this.setState({
+      user_words: words
+    });
   };
 
   successConfirmedHandler = () => {
-    this.setState({ success: false, message: "" });
+    this.setState({
+      success: false,
+      message: ""
+    });
   };
 
   render() {
-    const new_test = this.state.words.map((word, index) => {
+    const new_test = this.state.user_words.map((word, index) => {
       return (
         <tr key={word.id}>
-          <td>{this.state.words[index].polish}</td>
+          <td>{this.state.user_words[index].polish}</td>
           <td>
             <Form.Control
               type="text"
               placeholder=""
               required
-              value={this.state.words[index].answer}
+              value={this.state.user_words[index].answer}
               onChange={this.onUpdateWordHandler.bind(this, index)}
             />
           </td>
@@ -164,7 +164,7 @@ class Test extends Component {
       );
     });
 
-    const test_history = this.state.tests.map((test, index) => {
+    const test_history = this.state.user_tests.map((test, index) => {
       return (
         <tr key={test.id}>
           <td>{test.date}</td>
@@ -196,7 +196,7 @@ class Test extends Component {
         </Modal>
 
         <h1>
-          <i className="fas fa-trophy" /> {this.state.wordlist_name}
+          <i className="fas fa-trophy" /> {this.state.user_wordlist_name}
         </h1>
 
         <Breadcrumb>
@@ -212,7 +212,7 @@ class Test extends Component {
               pathname: "/word-lists/" + this.state.wordlist_id
             }}
           >
-            <BreadcrumbItem>{this.state.wordlist_name}</BreadcrumbItem>
+            <BreadcrumbItem>{this.state.user_wordlist_name}</BreadcrumbItem>
           </LinkContainer>
           <BreadcrumbItem active>Test</BreadcrumbItem>
         </Breadcrumb>
@@ -235,7 +235,7 @@ class Test extends Component {
         </Wrapper>
 
         <Wrapper>
-          <h5>Take the test</h5>
+          <h5>Complete the test</h5>
           <hr />
           <Form onSubmit={this.finshTestHandler}>
             <Table responsive striped bordered hover>

@@ -1,71 +1,75 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import happyLogo from "../../../Assets/happy.png";
-import Modal from "../../../Components/UI/Modal/Modal";
+import React, { Component } from "react";
+import { Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import classes from "./TestAnswers.module.css";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../../Components/UI/Modal/Modal";
+import happyLogo from "../../../Assets/happy.png";
 
 class TestAnswers extends Component {
   state = {
-    answers: [],
-    test: {},
-    wordlist_id: this.props.match.params.wordlistID,
-    test_id: this.props.match.params.testID,
-    wordlist_name: ""
+    user_wordlist_id: this.props.match.params.wordlistID,
+    user_test_id: this.props.match.params.testID,
+    user_test_answers: [],
+    user_test: {},
+    user_wordlist_name: ""
   };
 
   componentDidMount() {
-    this.getWordsList();
-    this.getTestAndAnswers();
+    this.getUserWordsList();
+    this.getUserTestAndAnswers();
   }
 
-  getWordsList = () => {
+  getUserWordsList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/userwordlist/" + this.state.user_wordlist_id + "/", { headers })
       .then(res => {
         this.setState({
-          wordlist_name: res.data.name
+          user_wordlist_name: res.data.name
         });
       })
       .catch(error => {});
   };
 
-  getTestAndAnswers = () => {
+  getUserTestAndAnswers = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
 
     axios
-      .get("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + this.state.test_id, { headers })
+      .get("/api/word/userwordlist/" + this.state.user_wordlist_id + "/tests/" + this.state.user_test_id, { headers })
       .then(res => {
         this.setState({
-          test: res.data
+          user_test: { ...res.data }
         });
         return axios
-          .get("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + this.state.test_id + "/answers/", {
-            headers
-          })
+          .get(
+            "/api/word/userwordlist/" + this.state.user_wordlist_id + "/tests/" + this.state.user_test_id + "/answers/",
+            {
+              headers
+            }
+          )
           .catch(error => {});
       })
       .then(res => {
         this.setState({
-          answers: res.data
+          user_test_answers: [...res.data]
         });
       })
       .catch(error => {});
   };
 
   successConfirmedHandler = () => {
-    this.setState({ success: false, message: "" });
+    this.setState({
+      success: false,
+      message: ""
+    });
   };
 
   render() {
-    const answers = this.state.answers.map((answer, index) => {
+    const user_test_answers = this.state.user_test_answers.map((answer, index) => {
       return (
         <tr key={answer.id} className={answer.correct ? classes.Correct : classes.Incorrect}>
           <td>{answer.polish}</td>
@@ -83,7 +87,7 @@ class TestAnswers extends Component {
         </Modal>
 
         <h1>
-          <i className="fas fa-history" /> Test: {this.state.test.date}
+          <i className="fas fa-history" /> Test: {this.state.user_test.date}
         </h1>
 
         <Breadcrumb>
@@ -96,19 +100,19 @@ class TestAnswers extends Component {
           </LinkContainer>
           <LinkContainer
             to={{
-              pathname: "/word-lists/" + this.state.wordlist_id
+              pathname: "/word-lists/" + this.state.user_wordlist_id
             }}
           >
-            <BreadcrumbItem>{this.state.wordlist_name}</BreadcrumbItem>
+            <BreadcrumbItem>{this.state.user_wordlist_name}</BreadcrumbItem>
           </LinkContainer>
           <LinkContainer
             to={{
-              pathname: "/word-lists/" + this.state.wordlist_id + "/test"
+              pathname: "/word-lists/" + this.state.user_wordlist_id + "/test"
             }}
           >
             <BreadcrumbItem>Test</BreadcrumbItem>
           </LinkContainer>
-          <BreadcrumbItem active>{this.state.test.date}</BreadcrumbItem>
+          <BreadcrumbItem active>{this.state.user_test.date}</BreadcrumbItem>
         </Breadcrumb>
 
         <Wrapper>
@@ -121,7 +125,7 @@ class TestAnswers extends Component {
                 <th>Your english answer</th>
               </tr>
             </thead>
-            <tbody>{answers}</tbody>
+            <tbody>{user_test_answers}</tbody>
           </Table>
         </Wrapper>
 
@@ -139,13 +143,13 @@ class TestAnswers extends Component {
             </thead>
             <tbody>
               <tr>
-                <td>{(this.state.test.correct_answers + this.state.test.incorrect_answers).toString()}</td>
-                <td className={classes.Correct}>{this.state.test.correct_answers}</td>
-                <td className={classes.Incorrect}>{this.state.test.incorrect_answers}</td>
+                <td>{(this.state.user_test.correct_answers + this.state.user_test.incorrect_answers).toString()}</td>
+                <td className={classes.Correct}>{this.state.user_test.correct_answers}</td>
+                <td className={classes.Incorrect}>{this.state.user_test.incorrect_answers}</td>
                 <td>
                   {Math.floor(
-                    (this.state.test.correct_answers /
-                      (this.state.test.correct_answers + this.state.test.incorrect_answers)) *
+                    (this.state.user_test.correct_answers /
+                      (this.state.user_test.correct_answers + this.state.user_test.incorrect_answers)) *
                       100
                   ).toString()}
                   %

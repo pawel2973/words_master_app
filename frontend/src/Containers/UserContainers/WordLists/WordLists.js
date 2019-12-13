@@ -1,53 +1,52 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
-import { Link } from "react-router-dom";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
 class WordLists extends Component {
   state = {
-    wordlists: [],
-    wordlist_name: "",
-    success: false,
-    message: ""
+    user_wordlists: [],
+    user_wordlist_name: "",
+    message: "",
+    success: false
   };
 
   componentDidMount() {
-    this.getLists();
+    this.getUserWordLists();
   }
 
-  getLists = () => {
+  getUserWordLists = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/userwordlist/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/userwordlist/", { headers })
       .then(res => {
         this.setState({
-          wordlists: res.data
+          user_wordlists: [...res.data]
         });
       })
       .catch(error => {});
   };
 
-  addWordListHandler = () => {
-    const formData = new FormData();
-    formData.append("name", this.state.wordlist_name);
+  addUserWordListHandler = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const formData = new FormData();
+    formData.append("name", this.state.user_wordlist_name);
+
     axios
       .post("/api/word/userwordlist/", formData, { headers })
-      .then(response => {
-        if (response.status === 201) {
+      .then(res => {
+        if (res.status === 201) {
           this.setState({
-            wordlist_name: "",
+            user_wordlist_name: "",
             success: true,
             message: "Successful word list create."
           });
-          this.getLists();
+          this.getUserWordLists();
         }
       })
       .catch(error => {});
@@ -61,7 +60,7 @@ class WordLists extends Component {
   };
 
   render() {
-    const wordlists = this.state.wordlists.map(wordlist => {
+    const user_wordlists = this.state.user_wordlists.map(wordlist => {
       return (
         <tr key={wordlist.id}>
           <td>{wordlist.name}</td>
@@ -84,7 +83,7 @@ class WordLists extends Component {
               to={{
                 pathname: "/word-lists/" + wordlist.id + "/test",
                 state: {
-                  wordlist_name: wordlist.name
+                  user_wordlist_name: wordlist.name
                 }
               }}
             >
@@ -120,12 +119,12 @@ class WordLists extends Component {
                   <Form.Control
                     type="text"
                     placeholder="word list name"
-                    value={this.state.wordlist_name}
-                    onChange={event => this.setState({ wordlist_name: event.target.value })}
+                    value={this.state.user_wordlist_name}
+                    onChange={event => this.setState({ user_wordlist_name: event.target.value })}
                   />
                 </Col>
                 <Col xl={2} lg={3} md={3} sm={4} xs={4}>
-                  <Button variant="primary" onClick={this.addWordListHandler} block>
+                  <Button variant="primary" onClick={this.addUserWordListHandler} block>
                     Create
                   </Button>
                 </Col>
@@ -145,7 +144,7 @@ class WordLists extends Component {
                 <th>Total words</th>
               </tr>
             </thead>
-            <tbody>{wordlists}</tbody>
+            <tbody>{user_wordlists}</tbody>
           </Table>
         </Wrapper>
       </Wrapper>

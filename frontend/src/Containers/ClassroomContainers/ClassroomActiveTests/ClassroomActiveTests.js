@@ -1,22 +1,16 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import Modal from "../../../Components/UI/Modal/Modal";
-import happyLogo from "../../../Assets/happy.png";
-import { Link } from "react-router-dom";
-import { LinkContainer } from "react-router-bootstrap";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 
-class ClassroomTests extends Component {
+class ClassroomActiveTests extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
-    classroom_name: "",
-
-    class_tests: [],
-    success: false,
-    message: "",
-    number_of_students: ""
+    classroom_tests: [],
+    classroom_name: ""
   };
 
   componentDidMount() {
@@ -25,28 +19,22 @@ class ClassroomTests extends Component {
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
         this.setState({
-          classroom_name: res.data.name,
-          number_of_students: res.data.students.length
+          classroom_name: res.data.name
         });
       })
-      .catch(error => {
-        this.setState({
-          redirect: true
-        });
-      });
+      .catch(error => {});
   };
 
   getClassTests = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     let classtests = [];
+
     axios
       .get("/api/word/classroom/" + this.state.classroom_id + "/classtests/", { headers })
       .then(res => {
@@ -57,43 +45,34 @@ class ClassroomTests extends Component {
       })
       .then(res => {
         const student_tests = [...res.data];
-        const class_tests_to_remove = [];
+        const classroom_tests_to_remove = [];
 
         classtests.forEach(c_test => {
           student_tests.forEach(s_test => {
             if (c_test.id === s_test.classtest) {
-              class_tests_to_remove.push(c_test);
+              classroom_tests_to_remove.push(c_test);
             }
           });
         });
 
-        class_tests_to_remove.forEach(r_test => {
+        classroom_tests_to_remove.forEach(r_test => {
           classtests = classtests.filter(currentValue => currentValue.id !== r_test.id);
         });
 
         this.setState({
-          class_tests: classtests
+          classroom_tests: [...classtests]
         });
       });
   };
 
-  getStudentTests = () => {};
-
-  successConfirmedHandler = () => {
-    this.setState({
-      success: false,
-      message: ""
-    });
-  };
-
   render() {
-    const class_tests = this.state.class_tests.map((class_test, index) => {
+    const classroom_tests = this.state.classroom_tests.map(test => {
       return (
-        <tr key={class_test.id}>
-          <td>{class_test.name}</td>
-          <td>{class_test.date}</td>
+        <tr key={test.id}>
+          <td>{test.name}</td>
+          <td>{test.date}</td>
           <td>
-            <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/tests/" + class_test.id }}>
+            <Link to={{ pathname: "/classrooms/" + this.state.classroom_id + "/tests/" + test.id }}>
               <Button variant="primary" block>
                 Start Test
               </Button>
@@ -102,15 +81,11 @@ class ClassroomTests extends Component {
         </tr>
       );
     });
+
     return (
       <Wrapper>
-        <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
-          <img src={happyLogo} alt="happy" />
-          {this.state.message}
-        </Modal>
-
         <h1>
-          <i className="fas fa-clipboard-list" /> Tests
+          <i className="fas fa-trophy" /> Tests
         </h1>
 
         <Breadcrumb>
@@ -141,7 +116,7 @@ class ClassroomTests extends Component {
                 <th>Created</th>
               </tr>
             </thead>
-            <tbody>{class_tests}</tbody>
+            <tbody>{classroom_tests}</tbody>
           </Table>
         </Wrapper>
       </Wrapper>
@@ -149,4 +124,4 @@ class ClassroomTests extends Component {
   }
 }
 
-export default withErrorHandler(ClassroomTests, axios);
+export default withErrorHandler(ClassroomActiveTests, axios);
