@@ -1,65 +1,68 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Row, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect, Link } from "react-router-dom";
+import { Button, Row, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
 import errorLogo from "../../../Assets/error.png";
-import Modal from "../../../Components/UI/Modal/Modal";
-import { LinkContainer } from "react-router-bootstrap";
-import { Link } from "react-router-dom";
 
 class TeacherClassroomDetail extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
-    classroom_name: "",
+    students: [],
+    student: {},
     student_email: "",
+    classroom_name: "",
+    message: "",
     student_id: null,
     isStudentExist: false,
     isStudentInClassroom: false,
-    students: [],
-    student: [],
-    show: false,
     redirect: false,
     success: false,
-    message: "",
     error: false
   };
 
   componentDidMount() {
     this.getClassroom();
-    this.getStudents();
+    this.getClassroomStudents();
   }
 
-  getStudents = () => {
+  getClassroom = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      // Get students from classroom
       .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({
-          students: res.data.students
-        });
-      })
-      .catch(error => {});
-  };
-
-  getClassroom = () => {
-    axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
+        if (res.status === 200) {
+          this.setState({
+            classroom_name: res.data.name
+          });
         }
-      })
-      .then(res => {
-        this.setState({ classroom_name: res.data.name });
       })
       .catch(error => {
         this.setState({
           redirect: true
         });
       });
+  };
+
+  getClassroomStudents = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
+    axios
+      // Get students from classroom
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            students: [...res.data.students]
+          });
+        }
+      })
+      .catch(error => {});
   };
 
   addStudentHandler = e => {
@@ -70,41 +73,43 @@ class TeacherClassroomDetail extends Component {
     axios
       .get("/api/word/user/", { headers })
       .then(res => {
-        const users = res.data;
-        users.forEach(user => {
-          if (user.email === this.state.student_email) {
-            // User Found
-            this.state.students.forEach(student => {
-              // Check if user is already in the classroom
-              if (student.email === user.email) {
+        if (res.status === 200) {
+          const users = res.data;
+          users.forEach(user => {
+            if (user.email === this.state.student_email) {
+              // User Found
+              this.state.students.forEach(student => {
+                // Check if user is already in the classroom
+                if (student.email === user.email) {
+                  this.setState({
+                    isStudentInClassroom: true
+                  });
+                }
+              });
+              if (this.state.isStudentInClassroom === false) {
+                // If students is not in classroom
                 this.setState({
-                  isStudentInClassroom: true
+                  isStudentExist: true,
+                  student: user,
+                  message: "Do you want to add a student to the class?"
                 });
               }
-            });
-            if (this.state.isStudentInClassroom === false) {
-              // If students is not in classroom
-              this.setState({
-                isStudentExist: true,
-                student: user,
-                message: "Do you want to add a student to the class?"
-              });
             }
+          });
+
+          if (this.state.isStudentExist === false) {
+            this.setState({
+              error: true,
+              message: "User not found."
+            });
           }
-        });
 
-        if (this.state.isStudentExist === false) {
-          this.setState({
-            error: true,
-            message: "User not found."
-          });
-        }
-
-        if (this.state.isStudentInClassroom === true) {
-          this.setState({
-            isStudentInClassroom: false,
-            message: "The student already belongs to the classroom."
-          });
+          if (this.state.isStudentInClassroom === true) {
+            this.setState({
+              isStudentInClassroom: false,
+              message: "The student already belongs to the classroom."
+            });
+          }
         }
       })
       .catch(error => {});
@@ -112,11 +117,11 @@ class TeacherClassroomDetail extends Component {
 
   confirmAddStudentHandler = e => {
     e.preventDefault();
-    const students = this.state.students;
-    const student = this.state.student;
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const students = [...this.state.students];
+    const student = { ...this.state.student };
     students.push(student);
 
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
       .patch("/api/word/classroom/" + this.state.classroom_id + "/", { students: students }, { headers })
       .then(response => {
@@ -126,6 +131,7 @@ class TeacherClassroomDetail extends Component {
             student_email: ""
           });
         }
+        this.getClassroomStudents();
       })
       .catch(error => {});
   };
@@ -133,20 +139,6 @@ class TeacherClassroomDetail extends Component {
   successConfirmedHandler = () => {
     this.setState({
       success: false,
-      message: ""
-    });
-  };
-
-  successAddStudentHandler = () => {
-    this.setState({
-      isStudentExist: false,
-      message: ""
-    });
-  };
-
-  errorConfirmedHandler = () => {
-    this.setState({
-      error: false,
       message: ""
     });
   };
@@ -167,6 +159,20 @@ class TeacherClassroomDetail extends Component {
         }
       })
       .catch(error => {});
+  };
+
+  successAddStudentHandler = () => {
+    this.setState({
+      isStudentExist: false,
+      message: ""
+    });
+  };
+
+  errorConfirmedHandler = () => {
+    this.setState({
+      error: false,
+      message: ""
+    });
   };
 
   render() {

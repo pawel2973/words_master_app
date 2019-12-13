@@ -1,69 +1,66 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem, Alert } from "react-bootstrap";
-// import classes from "./Teacher.module.css";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
-import { Link } from "react-router-dom";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
 class Teacher extends Component {
   state = {
-    classroom_name: "",
-    success: false,
+    teacher_classrooms: [],
+    new_classroom_name: "",
+    teacher_application_description: "",
     message: "",
-
     isTeacher: false,
-    description: "",
-    isApplicationSend: false,
-    classrooms: [],
-    classroom_id: null
+    classroom_to_delete_id: null,
+    isTeacherApplicationSend: false,
+    success: false
   };
 
   componentDidMount() {
     this.getTecher();
-    this.getTeacherApplications();
-    this.getClassrooms();
+    this.getTeacherClassrooms();
   }
 
   getTecher = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     //Get teachers from db
     axios
-      .get("/api/word/teacher/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/teacher/", { headers })
       .then(res => {
-        //Check if the user is a teacher
-        const teachers = res.data;
-        teachers.forEach(teacher => {
-          if (teacher.user === this.props.user_id) {
-            this.setState({
-              isTeacher: true
-            });
-          }
-        });
+        if (res.status === 200) {
+          const teachers = res.data;
+          teachers.forEach(teacher => {
+            //Check if the user is a teacher
+            if (teacher.user === this.props.user_id) {
+              this.setState({
+                isTeacher: true
+              });
+            } else {
+              this.getTeacherApplications();
+            }
+          });
+        }
       })
       .catch(error => {});
   };
 
   getTeacherApplications = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     //Get teacher applications from db
     axios
-      .get("/api/word/teacherapplication/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/teacherapplication/", { headers })
       .then(res => {
         //Check if the user is a teacher
         const applications = res.data;
         applications.forEach(application => {
           if (application.user === this.props.user_id) {
             this.setState({
-              isApplicationSend: true
+              isTeacherApplicationSend: true
             });
           }
         });
@@ -72,9 +69,10 @@ class Teacher extends Component {
   };
 
   teacherApplicationHandler = () => {
-    const formData = new FormData();
-    formData.append("description", this.state.description);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const formData = new FormData();
+    formData.append("teacher_application_description", this.state.teacher_application_description);
+
     axios
       .post("/api/word/teacherapplication/", formData, { headers })
       .then(response => {
@@ -90,9 +88,10 @@ class Teacher extends Component {
   };
 
   createClasroomHandler = () => {
-    const formData = new FormData();
-    formData.append("name", this.state.classroom_name);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const formData = new FormData();
+    formData.append("name", this.state.new_classroom_name);
+
     axios
       .post("/api/word/classroom/", formData, { headers })
       .then(response => {
@@ -100,25 +99,25 @@ class Teacher extends Component {
           this.setState({
             success: true,
             message: "Teacher classroom successfully was send.",
-            classroom_name: ""
+            new_classroom_name: ""
           });
-          this.getClassrooms();
+          this.getTeacherClassrooms();
         }
       })
       .catch(error => {});
   };
 
-  deleteClassroomHandler = (e, arr_id, classroom_id) => {
+  deleteClassroomHandler = (e, arr_id, classroom_to_delete_id) => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .delete("/api/word/classroom/" + classroom_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
+      .delete("/api/word/classroom/" + classroom_to_delete_id + "/", { headers })
       .then(response => {
         if (response.status === 204) {
-          const classrooms = [...this.state.classrooms];
-          classrooms.splice(arr_id, 1);
+          const teacher_classrooms = [...this.state.teacher_classrooms];
+          teacher_classrooms.splice(arr_id, 1);
           this.setState({
-            classrooms: classrooms,
+            teacher_classrooms: teacher_classrooms,
             success: true,
             message: "Successful classroom delete."
           });
@@ -127,18 +126,18 @@ class Teacher extends Component {
       .catch(error => {});
   };
 
-  getClassrooms = () => {
+  getTeacherClassrooms = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     //Get teacher applications from db
     axios
-      .get("/api/word/classroom/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/", { headers })
       .then(res => {
-        this.setState({
-          classrooms: res.data
-        });
+        if (res.status === 200) {
+          this.setState({
+            teacher_classrooms: [...res.data]
+          });
+        }
       })
       .catch(error => {});
   };
@@ -151,7 +150,7 @@ class Teacher extends Component {
   };
 
   render() {
-    const classrooms = this.state.classrooms.map((classroom, index) => {
+    const teacher_classrooms = this.state.teacher_classrooms.map((classroom, index) => {
       return (
         <tr key={classroom.id}>
           <td>{classroom.name}</td>
@@ -188,8 +187,8 @@ class Teacher extends Component {
                     as="textarea"
                     rows="3"
                     placeholder="Tell something about you and your school."
-                    value={this.state.description}
-                    onChange={event => this.setState({ description: event.target.value })}
+                    value={this.state.teacher_application_description}
+                    onChange={event => this.setState({ teacher_application_description: event.target.value })}
                   />
                 </Col>
                 <Col xl={2} lg={3} md={3} sm={4} xs={4}>
@@ -225,10 +224,10 @@ class Teacher extends Component {
         </Breadcrumb>
 
         {(() => {
-          if (this.state.isTeacher === false && this.state.isApplicationSend === false)
+          if (this.state.isTeacher === false && this.state.isTeacherApplicationSend === false)
             // Return teacher application form
             return teacherapplication;
-          else if (this.state.isTeacher === false && this.state.isApplicationSend === true)
+          else if (this.state.isTeacher === false && this.state.isTeacherApplicationSend === true)
             // Return information about verification of a sent user application
             return teacherapplicationalert;
           else if (this.state.isTeacher === true);
@@ -244,12 +243,8 @@ class Teacher extends Component {
                         <Form.Control
                           type="text"
                           placeholder="classroom name"
-                          value={this.state.classroom_name}
-                          onChange={event =>
-                            this.setState({
-                              classroom_name: event.target.value
-                            })
-                          }
+                          value={this.state.new_classroom_name}
+                          onChange={event => this.setState({ new_classroom_name: event.target.value })}
                         />
                       </Col>
                       <Col xl={2} lg={3} md={3} sm={4} xs={4}>
@@ -272,7 +267,7 @@ class Teacher extends Component {
                       <th>Total students</th>
                     </tr>
                   </thead>
-                  <tbody>{classrooms}</tbody>
+                  <tbody>{teacher_classrooms}</tbody>
                 </Table>
               </Wrapper>
             </>

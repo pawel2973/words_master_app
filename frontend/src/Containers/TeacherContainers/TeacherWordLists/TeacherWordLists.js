@@ -1,24 +1,21 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect, Link } from "react-router-dom";
 import { Button, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
-import { Link } from "react-router-dom";
-import { LinkContainer } from "react-router-bootstrap";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import { Redirect } from "react-router-dom";
 
 class TeacherWordLists extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
+    class_wordlists: [],
+    class_wordlist_name: "",
     classroom_name: "",
-    teacher_id: "",
-
-    wordlists: [],
-    wordlist_name: "",
-    success: false,
-    message: ""
+    message: "",
+    success: false
   };
 
   componentDidMount() {
@@ -27,17 +24,16 @@ class TeacherWordLists extends Component {
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({
-          classroom_name: res.data.name,
-          teacher_id: res.data.teacher
-        });
+        if (res.status === 200) {
+          this.setState({
+            classroom_name: res.data.name
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -47,16 +43,16 @@ class TeacherWordLists extends Component {
   };
 
   getClassWordList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", { headers })
       .then(res => {
-        this.setState({
-          wordlists: res.data
-        });
+        if (res.status === 200) {
+          this.setState({
+            class_wordlists: [...res.data]
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -65,16 +61,17 @@ class TeacherWordLists extends Component {
       });
   };
 
-  addWordListHandler = () => {
-    const formData = new FormData();
-    formData.append("name", this.state.wordlist_name);
+  addClassWordListHandler = () => {
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const formData = new FormData();
+    formData.append("name", this.state.class_wordlist_name);
+
     axios
       .post("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/", formData, { headers })
       .then(response => {
         if (response.status === 201) {
           this.setState({
-            wordlist_name: "",
+            class_wordlist_name: "",
             success: true,
             message: "Successful word list create."
           });
@@ -96,7 +93,7 @@ class TeacherWordLists extends Component {
       return <Redirect to={"/teacher"} />;
     }
 
-    const wordlists = this.state.wordlists.map(wordlist => {
+    const class_wordlists = this.state.class_wordlists.map(wordlist => {
       return (
         <tr key={wordlist.id}>
           <td>{wordlist.name}</td>
@@ -104,8 +101,6 @@ class TeacherWordLists extends Component {
           <td>{wordlist.total_words}</td>
           <td>{String(wordlist.visibility)}</td>
           <td>
-            {/* /api/word/classroom/{pk}/classwordlist/{pk}/classwords/ */}
-            {/* path="/teacher/:classroomID/word-lists/:wordlistID" */}
             <Link to={{ pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + wordlist.id }}>
               <Button variant="secondary" block>
                 Manage
@@ -164,12 +159,12 @@ class TeacherWordLists extends Component {
                   <Form.Control
                     type="text"
                     placeholder="word list name"
-                    value={this.state.wordlist_name}
-                    onChange={event => this.setState({ wordlist_name: event.target.value })}
+                    value={this.state.class_wordlist_name}
+                    onChange={event => this.setState({ class_wordlist_name: event.target.value })}
                   />
                 </Col>
                 <Col xl={2} lg={3} md={3} sm={4} xs={4}>
-                  <Button variant="primary" onClick={this.addWordListHandler} block>
+                  <Button variant="primary" onClick={this.addClassWordListHandler} block>
                     Create
                   </Button>
                 </Col>
@@ -190,7 +185,7 @@ class TeacherWordLists extends Component {
                 <th>Visible</th>
               </tr>
             </thead>
-            <tbody>{wordlists}</tbody>
+            <tbody>{class_wordlists}</tbody>
           </Table>
         </Wrapper>
       </Wrapper>

@@ -1,45 +1,43 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect, Link } from "react-router-dom";
 import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
-import { Link } from "react-router-dom";
-import { LinkContainer } from "react-router-bootstrap";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import { Redirect } from "react-router-dom";
 import { Pie } from "react-chartjs-2";
 
 class TeacherTestDetails extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
     class_test_id: this.props.match.params.testID,
+    student_tests: [],
     classroom_name: "",
-    tests: [],
-    wordlist_name: "",
-    success: false,
-    message: "",
     class_test_name: "",
-    average_grade: ""
+    student_average_grade: "",
+    message: "",
+    success: false
   };
 
   componentDidMount() {
     this.getClassroom();
     this.getClassTest();
-    this.getTest();
+    this.getStudentTests();
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({
-          classroom_name: res.data.name
-        });
+        if (res.status === 200) {
+          this.setState({
+            classroom_name: res.data.name
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -49,16 +47,16 @@ class TeacherTestDetails extends Component {
   };
 
   getClassTest = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/classtests/" + this.state.class_test_id, {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classtests/" + this.state.class_test_id, { headers })
       .then(res => {
-        this.setState({
-          class_test_name: res.data.name
-        });
+        if (res.status === 200) {
+          this.setState({
+            class_test_name: res.data.name
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -67,67 +65,57 @@ class TeacherTestDetails extends Component {
       });
   };
 
-  getTest = () => {
+  getStudentTests = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .get(
         "/api/word/classroom/" + this.state.classroom_id + "/classtests/" + this.state.class_test_id + "/studenttest/",
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`
-          }
-        }
+        { headers }
       )
       .then(res => {
-        console.log(res.data);
-        // console.log(res.data);
-        let average_grade = 0;
+        if (res.status === 200) {
+          let student_average_grade = 0;
+          const tests = [...res.data];
+          let grade_list = [];
+          let labels_list = [];
 
-        const tests = [...res.data];
-        let grade_list = [];
-        let labels_list = [];
+          tests.forEach(obj => {
+            student_average_grade += obj.grade;
+            grade_list.push(obj.grade);
+          });
 
-        tests.forEach(obj => {
-          average_grade += obj.grade;
-          grade_list.push(obj.grade);
-        });
+          grade_list.sort((a, b) => a - b);
+          // Count and group grades
+          const map = grade_list.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+          grade_list = [...map.values()];
+          labels_list = [...map.keys()];
 
-        console.log("AVG");
-        console.log(average_grade);
-        console.log(tests.length);
+          if (student_average_grade !== 0) {
+            student_average_grade = student_average_grade / tests.length;
+          } else {
+            student_average_grade = 0;
+          }
 
-        // var arr = [5, 5, 5, 2, 2, 2, 2, 2, 9, 4]
-        grade_list.sort((a, b) => a - b);
-        const map = grade_list.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-
-        grade_list = [...map.values()];
-        labels_list = [...map.keys()];
-
-        if (average_grade !== 0) {
-          average_grade = average_grade / tests.length;
-        } else {
-          average_grade = 0;
+          this.setState({
+            student_tests: [...res.data],
+            student_average_grade: student_average_grade,
+            grade_list: grade_list,
+            labels_list: labels_list
+          });
         }
-
-        this.setState({
-          tests: res.data,
-          average_grade: average_grade,
-          grade_list: grade_list,
-          labels_list: labels_list
-        });
       })
       .catch(error => {
         this.setState({
           redirect: true
         });
       });
-
-    console.log(this.state.tests);
   };
 
   copyWordListHandler = (e, word_list_name, word_list_id) => {
     e.preventDefault();
-    let words = [];
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    let words = [];
 
     axios
       .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + word_list_id + "/classwords/", {
@@ -171,7 +159,7 @@ class TeacherTestDetails extends Component {
       return <Redirect to={"/classroom"} />;
     }
 
-    const tests = this.state.tests.map(test => {
+    const student_tests = this.state.student_tests.map(test => {
       return (
         <tr key={test.id}>
           <td>
@@ -219,7 +207,7 @@ class TeacherTestDetails extends Component {
         </Modal>
 
         <h1>
-          <i className="fas fa-clipboard-list" /> Tests results
+          <i className="fas fa-trophy" /> Tests results
         </h1>
 
         <Breadcrumb>
@@ -261,12 +249,12 @@ class TeacherTestDetails extends Component {
                 <th>Percentage</th>
               </tr>
             </thead>
-            <tbody>{tests}</tbody>
+            <tbody>{student_tests}</tbody>
           </Table>
         </Wrapper>
 
         <Wrapper>
-          <h5>Test grade-point average is: {Number(this.state.average_grade).toFixed(2)}</h5>
+          <h5>Test grade-point average is: {Number(this.state.student_average_grade).toFixed(2)}</h5>
           <hr />
           <Pie data={data} />
         </Wrapper>

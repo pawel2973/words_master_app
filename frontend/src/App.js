@@ -1,20 +1,16 @@
+import axios from "axios";
+import withErrorHandler from "./hoc/withErrorHandler/withErrorHandler";
 import React, { Component, Fragment } from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
-
 import Layout from "./hoc/Layout/Layout";
 import Start from "./Containers/UserContainers/Start/Start";
-
 import Teacher from "./Containers/TeacherContainers/Teacher/Teacher";
-import TeacherClassroomDetail from "./Containers/TeacherContainers/TeacherClassroomDetail/TeacherClassroomDetail";
+import TeacherClassroomDetails from "./Containers/TeacherContainers/TeacherClassroomDetails/TeacherClassroomDetails";
 import TeacherWordLists from "./Containers/TeacherContainers/TeacherWordLists/TeacherWordLists";
 import Settings from "./Containers/UserContainers/Settings/Settings";
 import LoginForm from "./Components/Authentication/Login/LoginForm";
 import Modal from "./Components/UI/Modal/Modal";
 import SignupForm from "./Components/Authentication/Signup/SignupForm";
-
-import axios from "axios";
-
-import withErrorHandler from "./hoc/withErrorHandler/withErrorHandler";
 import PrivateRoute from "./hoc/PrivateRoute/PrivateRoute";
 import PublicRoute from "./hoc/PublicRoute/PublicRoute";
 import SignupRoute from "./hoc/SignupRoute/SignupRoute";
@@ -23,9 +19,8 @@ import happyLogo from "./Assets/happy.png";
 import WordLists from "./Containers/UserContainers/WordLists/WordLists";
 import Test from "./Containers/UserContainers/Test/Test";
 import TeacherWordListDetail from "./Containers/TeacherContainers/TeacherWordListDetail/TeacherWordListDetail";
-import CreateTest from "./Containers/TeacherContainers/CreateTest/CreateTest";
+import TeacherCreateTest from "./Containers/TeacherContainers/TeacherCreateTest/TeacherCreateTest";
 import TeacherTests from "./Containers/TeacherContainers/TeacherTests/TeacherTests";
-
 import Classrooms from "./Containers/ClassroomContainers/Classrooms/Classrooms";
 import ClassroomDetails from "./Containers/ClassroomContainers/ClassroomDetails/ClassroomDetails";
 import ClassroomWordList from "./Containers/ClassroomContainers/ClassroomWordList/ClassroomWordList";
@@ -43,12 +38,12 @@ class App extends Component {
   state = {
     logged_in: !!localStorage.getItem("token"),
     email: "",
+    account_type: "",
+    message: "",
     password: null,
     user_id: null,
-    account_type: "",
     sign_in: false,
-    success: false,
-    message: ""
+    success: false
   };
 
   componentDidMount() {
@@ -229,7 +224,7 @@ class App extends Component {
             <PrivateRoute
               exact
               path="/teacher/:classroomID"
-              component={TeacherClassroomDetail}
+              component={TeacherClassroomDetails}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
@@ -280,7 +275,7 @@ class App extends Component {
             <PrivateRoute
               exact
               path="/teacher/:classroomID/word-lists/:wordlistID/create-test"
-              component={CreateTest}
+              component={TeacherCreateTest}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

@@ -1,22 +1,21 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { Button, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
-import { Link } from "react-router-dom";
-import { LinkContainer } from "react-router-bootstrap";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 
 class TeacherTest extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
-    classroom_name: "",
-
     class_tests: [],
-    success: false,
+    classroom_name: "",
     message: "",
-    number_of_students: ""
+    number_of_students: null,
+    success: false
   };
 
   componentDidMount() {
@@ -25,17 +24,17 @@ class TeacherTest extends Component {
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({
-          classroom_name: res.data.name,
-          number_of_students: res.data.students.length
-        });
+        if (res.status === 200) {
+          this.setState({
+            classroom_name: res.data.name,
+            number_of_students: res.data.students.length
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -45,16 +44,18 @@ class TeacherTest extends Component {
   };
 
   getClassTests = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .get("/api/word/classroom/" + this.state.classroom_id + "/classtests/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
+        headers
       })
       .then(res => {
-        this.setState({
-          class_tests: res.data
-        });
+        if (res.status === 200) {
+          this.setState({
+            class_tests: [...res.data]
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -64,16 +65,17 @@ class TeacherTest extends Component {
   };
 
   deleteTestHandler = (e, arr_id, test_id) => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     axios
       .delete("/api/word/classroom/" + this.state.classroom_id + "/classtests/" + test_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
+        headers
       })
       .then(response => {
         if (response.status === 204) {
           const class_tests = [...this.state.class_tests];
           class_tests.splice(arr_id, 1);
           this.setState({
-            class_tests: class_tests,
+            class_tests: [...class_tests],
             success: true,
             message: "Successful test delete."
           });
@@ -121,7 +123,7 @@ class TeacherTest extends Component {
         </Modal>
 
         <h1>
-          <i className="fas fa-clipboard-list" /> Tests
+          <i className="fas fa-trophy" /> Tests
         </h1>
 
         <Breadcrumb>

@@ -57,7 +57,9 @@ class Settings extends Component {
 
     return (
       <Wrapper>
-        <h1>General Account Settings</h1>
+        <h1>
+          <i class="fas fa-cogs" /> General Account Settings
+        </h1>
         <Form>
           <Wrapper>
             <h5>Personal information</h5>

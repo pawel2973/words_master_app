@@ -1,40 +1,39 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Table, Row, Col, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
+import { Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-import { Link } from "react-router-dom";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import { Line } from "react-chartjs-2";
 
 class StudentStatististics extends Component {
   state = {
     classroom_id: this.props.match.params.classroomID,
     student_id: this.props.match.params.studentID,
+    student_tests: [],
+    student_grade_list: [],
+    student_labels_list: [],
+    student: {},
     classroom_name: "",
-    average_grade: 0,
-    tests: [],
-    grade_list: [],
-    labels_list: [],
-    student: {}
+    student_average_grade: 0
   };
 
   componentDidMount() {
     this.getClassroom();
-    this.getUser();
-    this.getTestStatistics();
+    this.getStudent();
+    this.getStudentTestStatistics();
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({ classroom_name: res.data.name });
+        if (res.status === 200) {
+          this.setState({ classroom_name: res.data.name });
+        }
       })
       .catch(error => {
         this.setState({
@@ -43,17 +42,15 @@ class StudentStatististics extends Component {
       });
   };
 
-  getUser = () => {
-    axios
-      .get("/api/word/user/" + this.state.student_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
-      .then(res => {
-        console.log(res.data);
+  getStudent = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
 
-        this.setState({ student: res.data });
+    axios
+      .get("/api/word/user/" + this.state.student_id + "/", { headers })
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({ student: res.data });
+        }
       })
       .catch(error => {
         this.setState({
@@ -62,8 +59,10 @@ class StudentStatististics extends Component {
       });
   };
 
-  getTestStatistics = () => {
-    let average_grade = 0;
+  getStudentTestStatistics = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    let student_average_grade = 0;
+
     axios
       .get(
         "/api/word/classroom/" +
@@ -71,51 +70,47 @@ class StudentStatististics extends Component {
           "/student/" +
           this.state.student_id +
           "/teacherstudenttests/",
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`
-          }
-        }
+        { headers }
       )
       .then(res => {
-        console.log(res.data);
-        const tests = [...res.data];
-        const grade_list = [];
-        const labels_list = [];
+        if (res.status === 200) {
+          const tests = [...res.data];
+          const student_grade_list = [];
+          const student_labels_list = [];
 
-        tests.forEach(obj => {
-          average_grade += obj.grade;
-          grade_list.push(obj.grade);
-          labels_list.push(obj.date);
-        });
+          tests.forEach(obj => {
+            student_average_grade += obj.grade;
+            student_grade_list.push(obj.grade);
+            student_labels_list.push(obj.date);
+          });
 
-        if (average_grade !== 0) {
-          average_grade = average_grade / tests.length;
-        } else {
-          average_grade = 0;
+          if (student_average_grade !== 0) {
+            student_average_grade = student_average_grade / tests.length;
+          } else {
+            student_average_grade = 0;
+          }
+
+          this.setState({
+            student_tests: res.data,
+            student_average_grade: student_average_grade,
+            student_grade_list: student_grade_list.reverse(),
+            student_labels_list: student_labels_list.reverse()
+          });
         }
-
-        this.setState({
-          tests: res.data,
-          average_grade: average_grade,
-          grade_list: grade_list.reverse(),
-          labels_list: labels_list.reverse()
-        });
       })
       .catch(error => {
         this.setState({
           redirect: true
         });
       });
-    // console.log(average_grade);
   };
 
   render() {
-    // if (this.state.redirect) {
-    //   return <Redirect to={"/teacher/"} />;
-    // }
+    if (this.state.redirect) {
+      return <Redirect to={"/teacher/"} />;
+    }
 
-    const tests = this.state.tests.map(test => {
+    const tests = this.state.student_tests.map(test => {
       return (
         <tr key={test.id}>
           <td>{test.classtest.name}</td>
@@ -130,7 +125,7 @@ class StudentStatististics extends Component {
     });
 
     const data = {
-      labels: this.state.labels_list,
+      labels: this.state.student_labels_list,
       datasets: [
         {
           label: "Grades Chart",
@@ -151,7 +146,7 @@ class StudentStatististics extends Component {
           pointHoverBorderWidth: 2,
           pointRadius: 1,
           pointHitRadius: 10,
-          data: this.state.grade_list
+          data: this.state.student_grade_list
         }
       ]
     };
@@ -159,7 +154,7 @@ class StudentStatististics extends Component {
     return (
       <Wrapper>
         <h1>
-          <i className="fas fa-chalkboard-teacher" /> {this.state.classroom_name}
+          <i class="fas fa-graduation-cap" /> {this.state.student.first_name} {this.state.student.last_name}
         </h1>
 
         <Breadcrumb>
@@ -185,7 +180,7 @@ class StudentStatististics extends Component {
         <Wrapper>
           <h5>
             {this.state.student.first_name} {this.state.student.last_name} grade-point average is:{" "}
-            {Number(this.state.average_grade).toFixed(2)}
+            {Number(this.state.student_average_grade).toFixed(2)}
           </h5>
           <hr />
           <Line data={data} />

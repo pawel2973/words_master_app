@@ -1,30 +1,27 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
-import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
-import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import errorLogo from "../../../Assets/error.png";
-import Modal from "../../../Components/UI/Modal/Modal";
+import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
+import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-// import classes from "./CreateTest.module.css";
+import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
+import Modal from "../../../Components/UI/Modal/Modal";
+import errorLogo from "../../../Assets/error.png";
 
 class CreateTest extends Component {
   state = {
-    words: [],
-    wordlist_id: this.props.match.params.wordlistID,
+    class_wordlist_id: this.props.match.params.wordlistID,
     classroom_id: this.props.match.params.classroomID,
     classroom_name: "",
-    wordlist_name: "",
-
+    class_wordlist_name: "",
+    class_test_name: "",
     message: "",
+    rating_system_id: null,
     redirect: false,
     error: false,
-    up_to_2: 29,
-    up_to_3: 50,
-    up_to_4: 80,
-    rating_system_id: null,
-    test_name: ""
+    grade_up_to_2: 29,
+    grade_up_to_3: 50,
+    grade_up_to_4: 80
   };
 
   componentDidMount() {
@@ -33,17 +30,17 @@ class CreateTest extends Component {
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({
-          classroom_name: res.data.name,
-          teacher_id: res.data.teacher
-        });
+        if (res.status === 200) {
+          this.setState({
+            classroom_name: res.data.name,
+            teacher_id: res.data.teacher
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -53,17 +50,19 @@ class CreateTest extends Component {
   };
 
   getClassWordList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.class_wordlist_id + "/", {
+        headers
       })
       .then(res => {
-        this.setState({
-          wordlist_name: res.data.name,
-          test_name: "[TEST] " + res.data.name
-        });
+        if (res.status === 200) {
+          this.setState({
+            class_wordlist_name: res.data.name,
+            class_test_name: "[TEST] " + res.data.name
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -73,21 +72,19 @@ class CreateTest extends Component {
   };
 
   createTestHandler = () => {
-    if (this.state.up_to_2 < this.state.up_to_3 && this.state.up_to_3 < this.state.up_to_4) {
-      if (this.state.up_to_2 > 99 || this.state.up_to_3 > 99 || this.state.up_to_4 > 99) {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
+    if (this.state.grade_up_to_2 < this.state.grade_up_to_3 && this.state.grade_up_to_3 < this.state.grade_up_to_4) {
+      if (this.state.grade_up_to_2 > 99 || this.state.grade_up_to_3 > 99 || this.state.grade_up_to_4 > 99) {
         this.setState({
           error: true,
           message: "Values must be less than 100%."
         });
       } else {
-        const headers = {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-          "Content-Type": "application/x-www-form-urlencoded"
-        };
         const ratingsystem = {
-          grade_2: this.state.up_to_2,
-          grade_3: this.state.up_to_3,
-          grade_4: this.state.up_to_4
+          grade_2: this.state.grade_up_to_2,
+          grade_3: this.state.grade_up_to_3,
+          grade_4: this.state.grade_up_to_4
         };
         const formData = new FormData();
         Object.keys(ratingsystem).map(item => formData.append(item, ratingsystem[item]));
@@ -96,7 +93,7 @@ class CreateTest extends Component {
             "/api/word/classroom/" +
               this.state.classroom_id +
               "/classwordlist/" +
-              this.state.wordlist_id +
+              this.state.class_wordlist_id +
               "/ratingsystem/",
             formData,
             { headers }
@@ -106,7 +103,7 @@ class CreateTest extends Component {
               rating_system_id: res.data.id
             });
             const formData2 = new FormData();
-            formData2.append("name", this.state.test_name);
+            formData2.append("name", this.state.class_test_name);
             formData2.append("classroom", this.state.classroom_id);
             formData2.append("ratingsystem", this.state.rating_system_id);
             return axios
@@ -114,7 +111,7 @@ class CreateTest extends Component {
                 "/api/word/classroom/" +
                   this.state.classroom_id +
                   "/classwordlist/" +
-                  this.state.wordlist_id +
+                  this.state.class_wordlist_id +
                   "/classtests/",
                 formData2,
                 { headers }
@@ -164,7 +161,7 @@ class CreateTest extends Component {
         </Modal>
 
         <h1>
-          <i className="far fa-edit" /> {this.state.wordlist_name}
+          <i className="far fa-edit" /> {this.state.class_wordlist_name}
         </h1>
 
         <Breadcrumb>
@@ -193,10 +190,10 @@ class CreateTest extends Component {
 
           <LinkContainer
             to={{
-              pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + this.state.wordlist_id
+              pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + this.state.class_wordlist_id
             }}
           >
-            <BreadcrumbItem>{this.state.wordlist_name}</BreadcrumbItem>
+            <BreadcrumbItem>{this.state.class_wordlist_name}</BreadcrumbItem>
           </LinkContainer>
 
           <BreadcrumbItem active>Create test</BreadcrumbItem>
@@ -207,8 +204,8 @@ class CreateTest extends Component {
           <Form.Control
             type="text"
             placeholder="test name"
-            value={this.state.test_name}
-            onChange={event => this.setState({ test_name: event.target.value })}
+            value={this.state.class_test_name}
+            onChange={event => this.setState({ class_test_name: event.target.value })}
           />
         </Wrapper>
 
@@ -227,7 +224,7 @@ class CreateTest extends Component {
                 <td>
                   Test percentage value of grade 2
                   <br />
-                  <strong>(0 - {this.state.up_to_2}%)</strong>
+                  <strong>(0 - {this.state.grade_up_to_2}%)</strong>
                 </td>
                 <td>
                   <Form.Control
@@ -235,10 +232,10 @@ class CreateTest extends Component {
                     placeholder="up to 2"
                     min={0}
                     max={100}
-                    value={this.state.up_to_2}
+                    value={this.state.grade_up_to_2}
                     onChange={event =>
                       this.setState({
-                        up_to_2: event.target.value
+                        grade_up_to_2: event.target.value
                       })
                     }
                   />
@@ -249,7 +246,7 @@ class CreateTest extends Component {
                   Test percentage value of grade 3
                   <br />
                   <strong>
-                    ({Number(this.state.up_to_2) + 1} - {this.state.up_to_3}%)
+                    ({Number(this.state.grade_up_to_2) + 1} - {this.state.grade_up_to_3}%)
                   </strong>
                 </td>
                 <td>
@@ -258,10 +255,10 @@ class CreateTest extends Component {
                     placeholder="up to 3"
                     min={0}
                     max={100}
-                    value={this.state.up_to_3}
+                    value={this.state.grade_up_to_3}
                     onChange={event =>
                       this.setState({
-                        up_to_3: event.target.value
+                        grade_up_to_3: event.target.value
                       })
                     }
                   />
@@ -272,7 +269,7 @@ class CreateTest extends Component {
                   Test percentage value of grade 4
                   <br />
                   <strong>
-                    ({Number(this.state.up_to_3) + 1} - {this.state.up_to_4}%)
+                    ({Number(this.state.grade_up_to_3) + 1} - {this.state.grade_up_to_4}%)
                   </strong>
                 </td>
                 <td>
@@ -281,10 +278,10 @@ class CreateTest extends Component {
                     placeholder="up to 4"
                     min={0}
                     max={100}
-                    value={this.state.up_to_4}
+                    value={this.state.grade_up_to_4}
                     onChange={event =>
                       this.setState({
-                        up_to_4: event.target.value
+                        grade_up_to_4: event.target.value
                       })
                     }
                   />
@@ -292,7 +289,7 @@ class CreateTest extends Component {
               </tr>
               <tr>
                 <td>Test percentage value of grade 5</td>
-                <td>({Number(this.state.up_to_4) + 1} - 100%)</td>
+                <td>({Number(this.state.grade_up_to_4) + 1} - 100%)</td>
               </tr>
             </tbody>
           </Table>

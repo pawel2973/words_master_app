@@ -1,28 +1,28 @@
-import React, { Component } from "react";
 import axios from "../../../axios";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
 import { Button, Row, Col, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import classes from "./TeacherWordListDetail.module.css";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
-import { Redirect } from "react-router-dom";
-import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
-import happyLogo from "../../../Assets/happy.png";
 import Modal from "../../../Components/UI/Modal/Modal";
-import { LinkContainer } from "react-router-bootstrap";
+import happyLogo from "../../../Assets/happy.png";
 
 class TeacherWordListDetail extends Component {
   state = {
-    words: [],
-    wordlist_id: this.props.match.params.wordlistID,
+    class_wordlist_id: this.props.match.params.wordlistID,
     classroom_id: this.props.match.params.classroomID,
+    class_words: [],
     classroom_name: "",
-    wordlist_name: "",
-    wordlist_name_to_update: "",
-    wordlist_visibility: null,
-    success: false,
+    class_wordlist_name: "",
+    class_wordlist_name_to_update: "",
+    new_english_word: "",
+    new_polish_word: "",
     message: "",
+    class_wordlist_visibility: null,
+    success: false,
     redirect: false,
-    new_english: "",
-    new_polish: "",
     error: false
   };
 
@@ -33,17 +33,16 @@ class TeacherWordListDetail extends Component {
   }
 
   getClassroom = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
-      })
+      .get("/api/word/classroom/" + this.state.classroom_id + "/", { headers })
       .then(res => {
-        this.setState({
-          classroom_name: res.data.name,
-          teacher_id: res.data.teacher
-        });
+        if (res.status === 200) {
+          this.setState({
+            classroom_name: res.data.name
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -53,18 +52,20 @@ class TeacherWordListDetail extends Component {
   };
 
   getClassWordsList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/", {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`
-        }
+      .get("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.class_wordlist_id + "/", {
+        headers
       })
       .then(res => {
-        this.setState({
-          wordlist_name: res.data.name,
-          wordlist_name_to_update: res.data.name,
-          wordlist_visibility: res.data.visibility
-        });
+        if (res.status === 200) {
+          this.setState({
+            class_wordlist_name: res.data.name,
+            class_wordlist_name_to_update: res.data.name,
+            class_wordlist_visibility: res.data.visibility
+          });
+        }
       })
       .catch(error => {
         this.setState({
@@ -74,37 +75,42 @@ class TeacherWordListDetail extends Component {
   };
 
   getWordsfromList = () => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .get(
-        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/classwords/",
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`
-          }
-        }
+        "/api/word/classroom/" +
+          this.state.classroom_id +
+          "/classwordlist/" +
+          this.state.class_wordlist_id +
+          "/classwords/",
+        { headers }
       )
       .then(res => {
-        this.setState({ words: res.data });
+        if (res.status === 200) {
+          this.setState({ class_words: [...res.data] });
+        }
       })
       .catch(error => {});
   };
 
-  updateWordListNameHandler = (e, name) => {
+  updateClassWordListNameHandler = (e, name) => {
     e.preventDefault();
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     const formData = new FormData();
     formData.append("name", name);
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .patch(
-        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/",
+        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.class_wordlist_id + "/",
         formData,
         { headers }
       )
-      .then(response => {
-        if (response.status === 200) {
+      .then(res => {
+        if (res.status === 200) {
           this.setState({
             success: true,
-            wordlist_name: name,
+            class_wordlist_name: name,
             message: "Successful word list name update."
           });
         }
@@ -112,36 +118,48 @@ class TeacherWordListDetail extends Component {
       .catch(error => {});
   };
 
-  deleteWordListHandler = e => {
+  deleteClassWordListHandler = e => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
-      .delete("/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/", {
-        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-      })
-      .then(response => {
-        this.setState({
-          redirect: true
-        });
+      .delete(
+        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.class_wordlist_id + "/",
+        {
+          headers
+        }
+      )
+      .then(res => {
+        if (res.status === 204) {
+          this.setState({
+            redirect: true
+          });
+        }
       })
       .catch(error => {});
   };
 
-  addWordHandler = e => {
+  addClassWordHandler = e => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("english", this.state.new_english);
-    formData.append("polish", this.state.new_polish);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const formData = new FormData();
+    formData.append("english", this.state.new_english_word);
+    formData.append("polish", this.state.new_polish_word);
+
     axios
       .post(
-        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/classwords/",
+        "/api/word/classroom/" +
+          this.state.classroom_id +
+          "/classwordlist/" +
+          this.state.class_wordlist_id +
+          "/classwords/",
         formData,
         { headers }
       )
-      .then(response => {
-        if (response.status === 201) {
+      .then(res => {
+        if (res.status === 201) {
           this.setState({
-            new_english: "",
-            new_polish: ""
+            new_english_word: "",
+            new_polish_word: ""
           });
           this.getWordsfromList();
         }
@@ -149,30 +167,30 @@ class TeacherWordListDetail extends Component {
       .catch(error => {});
   };
 
-  updateWordHandler = (e, arr_id, word_id) => {
+  updateClassWordHandler = (e, arr_id, word_id) => {
     e.preventDefault();
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     const word = {
-      polish: this.state.words[arr_id].polish,
-      english: this.state.words[arr_id].english
+      polish: this.state.class_words[arr_id].polish,
+      english: this.state.class_words[arr_id].english
     };
-
     const formData = new FormData();
     Object.keys(word).map(item => formData.append(item, word[item]));
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .patch(
         "/api/word/classroom/" +
           this.state.classroom_id +
           "/classwordlist/" +
-          this.state.wordlist_id +
+          this.state.class_wordlist_id +
           "/classwords/" +
           word_id +
           "/",
         formData,
         { headers }
       )
-      .then(response => {
-        if (response.status === 200) {
+      .then(res => {
+        if (res.status === 200) {
           this.setState({
             success: true,
             message: "Successful word update."
@@ -182,35 +200,34 @@ class TeacherWordListDetail extends Component {
       .catch(error => {});
   };
 
-  onUpdateWordHandler = (id, lang, e) => {
-    const words = [...this.state.words];
+  onUpdateClassWordHandler = (id, lang, e) => {
+    const class_words = [...this.state.class_words];
     if (lang === "pl") {
-      words[id].polish = e.target.value;
+      class_words[id].polish = e.target.value;
     } else if (lang === "en") {
-      words[id].english = e.target.value;
+      class_words[id].english = e.target.value;
     }
     this.setState({
-      words: words
+      class_words: [...class_words]
     });
   };
 
   switchVisibilityHandler = e => {
-    // ==================================
     e.preventDefault();
-    const visibility = !this.state.wordlist_visibility;
-    console.log(visibility);
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    const class_wordlist_visibility = !this.state.class_wordlist_visibility;
+
     axios
       .patch(
-        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.wordlist_id + "/",
-        { visibility: visibility },
+        "/api/word/classroom/" + this.state.classroom_id + "/classwordlist/" + this.state.class_wordlist_id + "/",
+        { visibility: class_wordlist_visibility },
         { headers }
       )
-      .then(response => {
-        if (response.status === 200) {
+      .then(res => {
+        if (res.status === 200) {
           this.setState({
             success: true,
-            wordlist_visibility: visibility,
+            class_wordlist_visibility: class_wordlist_visibility,
             message: "Successful word list visibility update."
           });
         }
@@ -226,25 +243,25 @@ class TeacherWordListDetail extends Component {
   };
 
   deleteWordHandler = (e, arr_id, word_id) => {
+    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+
     axios
       .delete(
         "/api/word/classroom/" +
           this.state.classroom_id +
           "/classwordlist/" +
-          this.state.wordlist_id +
+          this.state.class_wordlist_id +
           "/classwords/" +
           word_id +
           "/",
-        {
-          headers: { Authorization: `Token ${localStorage.getItem("token")}` }
-        }
+        { headers }
       )
-      .then(response => {
-        if (response.status === 204) {
-          const words = [...this.state.words];
-          words.splice(arr_id, 1);
+      .then(res => {
+        if (res.status === 204) {
+          const class_words = [...this.state.class_words];
+          class_words.splice(arr_id, 1);
           this.setState({
-            words: words,
+            class_words: [...class_words],
             success: true,
             message: "Successful word delete."
           });
@@ -264,27 +281,27 @@ class TeacherWordListDetail extends Component {
       );
     }
 
-    const words = this.state.words.map((word, index) => {
+    const class_words = this.state.class_words.map((word, index) => {
       return (
         <tr key={word.id}>
           <td>
             <Form.Control
               type="text"
               placeholder="Polish"
-              value={this.state.words[index].polish}
-              onChange={this.onUpdateWordHandler.bind(this, index, "pl")}
+              value={this.state.class_words[index].polish}
+              onChange={this.onUpdateClassWordHandler.bind(this, index, "pl")}
             />
           </td>
           <td>
             <Form.Control
               type="text"
               placeholder="English"
-              value={this.state.words[index].english}
-              onChange={this.onUpdateWordHandler.bind(this, index, "en")}
+              value={this.state.class_words[index].english}
+              onChange={this.onUpdateClassWordHandler.bind(this, index, "en")}
             />
           </td>
           <td>
-            <Button variant="primary" block onClick={e => this.updateWordHandler(e, index, word.id)}>
+            <Button variant="primary" block onClick={e => this.updateClassWordHandler(e, index, word.id)}>
               update
             </Button>
           </td>
@@ -305,7 +322,7 @@ class TeacherWordListDetail extends Component {
         </Modal>
 
         <h1>
-          <i className="far fa-edit" /> {this.state.wordlist_name}
+          <i className="far fa-edit" /> {this.state.class_wordlist_name}
         </h1>
 
         <Breadcrumb>
@@ -332,7 +349,7 @@ class TeacherWordListDetail extends Component {
             <BreadcrumbItem>Word lists</BreadcrumbItem>
           </LinkContainer>
 
-          <BreadcrumbItem active>{this.state.wordlist_name}</BreadcrumbItem>
+          <BreadcrumbItem active>{this.state.class_wordlist_name}</BreadcrumbItem>
         </Breadcrumb>
 
         <Wrapper>
@@ -345,10 +362,10 @@ class TeacherWordListDetail extends Component {
                     type="text"
                     placeholder="name"
                     className={classes.NameInput}
-                    value={this.state.wordlist_name_to_update}
+                    value={this.state.class_wordlist_name_to_update}
                     onChange={event =>
                       this.setState({
-                        wordlist_name_to_update: event.target.value
+                        class_wordlist_name_to_update: event.target.value
                       })
                     }
                   />
@@ -357,13 +374,13 @@ class TeacherWordListDetail extends Component {
                   <Button
                     variant="primary"
                     block
-                    onClick={e => this.updateWordListNameHandler(e, this.state.wordlist_name_to_update)}
+                    onClick={e => this.updateClassWordListNameHandler(e, this.state.class_wordlist_name_to_update)}
                   >
                     change name
                   </Button>
                 </Col>
                 <Col xl={2} lg={3} md={3} sm={6} xs={6}>
-                  <Button variant="danger" block onClick={e => this.deleteWordListHandler(e)}>
+                  <Button variant="danger" block onClick={e => this.deleteClassWordListHandler(e)}>
                     delete
                   </Button>
                 </Col>
@@ -373,14 +390,14 @@ class TeacherWordListDetail extends Component {
           <hr />
           <Row>
             <Col>
-              Is word list visible:{" "}
-              {!this.state.wordlist_visibility ? (
+              Is word list visible:
+              {!this.state.class_wordlist_visibility ? (
                 <Button variant="danger" onClick={e => this.switchVisibilityHandler(e)}>
-                  {String(this.state.wordlist_visibility)}
+                  {String(this.state.class_wordlist_visibility)}
                 </Button>
               ) : (
                 <Button variant="success" onClick={e => this.switchVisibilityHandler(e)}>
-                  {String(this.state.wordlist_visibility)}
+                  {String(this.state.class_wordlist_visibility)}
                 </Button>
               )}
             </Col>
@@ -403,20 +420,20 @@ class TeacherWordListDetail extends Component {
                   <Form.Control
                     type="text"
                     placeholder="Polish"
-                    value={this.state.new_polish}
-                    onChange={event => this.setState({ new_polish: event.target.value })}
+                    value={this.state.new_polish_word}
+                    onChange={event => this.setState({ new_polish_word: event.target.value })}
                   />
                 </td>
                 <td>
                   <Form.Control
                     type="text"
                     placeholder="English"
-                    value={this.state.new_english}
-                    onChange={event => this.setState({ new_english: event.target.value })}
+                    value={this.state.new_english_word}
+                    onChange={event => this.setState({ new_english_word: event.target.value })}
                   />
                 </td>
                 <td>
-                  <Button variant="success" block onClick={this.addWordHandler}>
+                  <Button variant="success" block onClick={this.addClassWordHandler}>
                     add
                   </Button>
                 </td>
@@ -435,7 +452,7 @@ class TeacherWordListDetail extends Component {
                 <th>English</th>
               </tr>
             </thead>
-            <tbody>{words}</tbody>
+            <tbody>{class_words}</tbody>
           </Table>
         </Wrapper>
       </Wrapper>
