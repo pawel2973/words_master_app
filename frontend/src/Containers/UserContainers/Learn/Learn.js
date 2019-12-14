@@ -1,8 +1,9 @@
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import axios from "axios";
 import React, { Component } from "react";
-import { Button, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { Button, Row, Col, Alert, Breadcrumb, BreadcrumbItem } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import classes from "./Learn.module.css";
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 
@@ -10,7 +11,8 @@ class Learn extends Component {
   state = {
     wordlist_id: this.props.match.params.wordlistID,
     user_wordlist_name: "",
-    error: false
+    error: false,
+    isEnoughWords: true
   };
 
   componentDidMount() {
@@ -27,6 +29,12 @@ class Learn extends Component {
           this.setState({
             user_wordlist_name: res.data.name
           });
+
+          if (res.data.total_words < 4) {
+            this.setState({
+              isEnoughWords: false
+            });
+          }
         }
       })
       .catch(error => {
@@ -43,37 +51,57 @@ class Learn extends Component {
           <i className="fab fa-leanpub" /> {this.state.user_wordlist_name}
         </h1>
 
-        <Wrapper>
-          <h5>Choose learning mode</h5>
-          <hr />
-          <Row>
-            <Col>
-              <Link to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/learn/simple" }}>
-                <Button className={classes.Square} variant="primary">
-                  Simple Test
+        <Breadcrumb>
+          <LinkContainer
+            to={{
+              pathname: "/word-lists/"
+            }}
+          >
+            <BreadcrumbItem>Word Lists</BreadcrumbItem>
+          </LinkContainer>
+          <BreadcrumbItem active>Learn</BreadcrumbItem>
+        </Breadcrumb>
+
+        <Alert variant="warning">
+          <i className="fas fa-exclamation-circle" /> All modes require at least <strong>4 words</strong> in the word
+          list.
+        </Alert>
+
+        {this.state.isEnoughWords ? (
+          <Wrapper>
+            <h5>Choose learning mode</h5>
+            <hr />
+            <Row>
+              <Col>
+                <Link to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/learn/simple" }}>
+                  <Button className={classes.Square} variant="primary">
+                    Simple
+                  </Button>
+                </Link>
+              </Col>
+              <Col>
+                <Link to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/learn/four-words" }}>
+                  <Button className={classes.Square} variant="success">
+                    4 Words
+                  </Button>
+                </Link>
+              </Col>
+            </Row>
+            <br />
+            <Row>
+              <Col>
+                <Button className={classes.Square} variant="warning">
+                  Letter by letter
                 </Button>
-              </Link>
-            </Col>
-            <Col>
-              <Button className={classes.Square} variant="success">
-                4 Words
-              </Button>
-            </Col>
-          </Row>
-          <br />
-          <Row>
-            <Col>
-              <Button className={classes.Square} variant="warning">
-                Letter by letter
-              </Button>
-            </Col>
-            <Col>
-              <Button className={classes.Square} variant="danger">
-                Random letter
-              </Button>
-            </Col>
-          </Row>
-        </Wrapper>
+              </Col>
+              <Col>
+                <Button className={classes.Square} variant="danger">
+                  Random letter
+                </Button>
+              </Col>
+            </Row>
+          </Wrapper>
+        ) : null}
       </Wrapper>
     );
   }
