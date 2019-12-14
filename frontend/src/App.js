@@ -33,6 +33,8 @@ import TeacherStudentTestsAnswers from "./Containers/TeacherContainers/TeacherSt
 import StudentStatistics from "./Containers/TeacherContainers/StudentStatististics/StudentStatistics";
 import WordListDetails from "./Containers/UserContainers/WordListDetails/WordListDetails";
 import ClassroomActiveTests from "./Containers/ClassroomContainers/ClassroomActiveTests/ClassroomActiveTests";
+import Learn from "./Containers/UserContainers/Learn/Learn";
+import Simple from "./Containers/UserContainers/Learn/Games/Simple/Simple";
 
 class App extends Component {
   state = {
@@ -204,6 +206,20 @@ class App extends Component {
               exact
               path="/word-lists/:wordlistID/test"
               component={Test}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID/learn"
+              component={Learn}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID/learn/simple"
+              component={Simple}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />

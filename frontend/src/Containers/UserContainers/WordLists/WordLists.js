@@ -74,9 +74,11 @@ class WordLists extends Component {
             </Link>
           </td>
           <td>
-            <Button variant="success" block>
-              Learn
-            </Button>
+            <Link to={{ pathname: "/word-lists/" + wordlist.id + "/learn" }}>
+              <Button variant="success" block>
+                Learn
+              </Button>
+            </Link>
           </td>
           <td>
             <Link
