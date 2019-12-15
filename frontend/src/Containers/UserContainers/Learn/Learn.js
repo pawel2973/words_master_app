@@ -90,14 +90,18 @@ class Learn extends Component {
             <br />
             <Row>
               <Col>
-                <Button className={classes.Square} variant="warning">
-                  Letter by letter
-                </Button>
+                <Link to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/learn/letter-by-letter" }}>
+                  <Button className={classes.Square} variant="warning">
+                    Letter by letter
+                  </Button>
+                </Link>
               </Col>
               <Col>
-                <Button className={classes.Square} variant="danger">
-                  Random letter
-                </Button>
+                <Link to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/learn/random-letter" }}>
+                  <Button className={classes.Square} variant="danger">
+                    Random letter
+                  </Button>
+                </Link>
               </Col>
             </Row>
           </Wrapper>

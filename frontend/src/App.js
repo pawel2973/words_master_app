@@ -36,6 +36,8 @@ import ClassroomActiveTests from "./Containers/ClassroomContainers/ClassroomActi
 import Learn from "./Containers/UserContainers/Learn/Learn";
 import Simple from "./Containers/UserContainers/Learn/Games/Simple/Simple";
 import FourWords from "./Containers/UserContainers/Learn/Games/FourWords/FourWords";
+import LetterByLetter from "./Containers/UserContainers/Learn/Games/LetterByLetter/LetterByLetter";
+import RandomLetter from "./Containers/UserContainers/Learn/Games/RandomLetter/RandomLetter";
 
 class App extends Component {
   state = {
@@ -221,6 +223,20 @@ class App extends Component {
               exact
               path="/word-lists/:wordlistID/learn/simple"
               component={Simple}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID/learn/letter-by-letter"
+              component={LetterByLetter}
+              logged_in={this.state.logged_in}
+              user_id={this.state.user_id}
+            />
+            <PrivateRoute
+              exact
+              path="/word-lists/:wordlistID/learn/random-letter"
+              component={RandomLetter}
               logged_in={this.state.logged_in}
               user_id={this.state.user_id}
             />
