@@ -7,10 +7,10 @@ from core import models
 
 class UserAdmin(BaseUserAdmin):
     ordering = ['id']
-    list_display = ['email', 'id', 'first_name', 'last_name', 'account_type']
+    list_display = ['email', 'id', 'first_name', 'last_name']
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        (_('Personal Info'), {'fields': ('first_name', 'last_name', 'account_type')}),
+        (_('Personal Info'), {'fields': ('first_name', 'last_name')}),
         (
             _('Permissions'),
             {
@@ -32,17 +32,14 @@ class UserAdmin(BaseUserAdmin):
 
 
 class ClassroomAdmin(admin.ModelAdmin):
-    # Custom classroom display in django admin
     list_display = ['id', 'name', 'teacher']
 
 
 class UserWordListAdmin(admin.ModelAdmin):
-    # Custom classroom display in django admin
     list_display = ['name', 'user', 'id']
 
 
 class UserWordAdmin(admin.ModelAdmin):
-    # Custom classroom display in django admin
     list_display = ['user', 'userwordlist', 'polish', 'english', 'id']
 
 

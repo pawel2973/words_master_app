@@ -7,9 +7,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.conf import settings
 
 
-# User manager class
-# Class that provides helpful functions for creating a user or creating a super user.
-# We're going to override a couple of the func's to handle our e-mail address instead of the username that he expects.
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **kwargs):
@@ -17,9 +14,9 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('Users must have an email address')
         user = self.model(email=self.normalize_email(email),
-                          **kwargs)  # self.model - uzyskujemy dostep do tego modelu, ktory ma menadzer
-        user.set_password(password)  # cos pass must be encrypted
-        user.save(using=self._db)  # using=self._db : required for supporting multiple db it's good practice
+                          **kwargs)
+        user.set_password(password)
+        user.save(using=self._db)
 
         return user
 
@@ -53,11 +50,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    account_type = models.CharField(default="user", choices=ACC_TYPE_CHOICES, max_length=255)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'  # Basically it is specifying to use email as login rather than the username.
+    USERNAME_FIELD = 'email'
 
     def __str__(self):
         return str(self.email) + " -> " + self.first_name + " " + self.last_name
@@ -69,8 +65,7 @@ class UserWordList(models.Model):
     date = models.DateTimeField(default=datetime.now, blank=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        # related_name='userwordlist'
+        on_delete=models.CASCADE
     )
 
     def __str__(self):
@@ -100,12 +95,12 @@ class UserTest(models.Model):
     date = models.DateTimeField(default=datetime.now, blank=False)
     correct_answers = models.PositiveIntegerField()
     incorrect_answers = models.PositiveIntegerField()
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
     userwordlist = models.ForeignKey(
         UserWordList,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
 
@@ -141,7 +136,7 @@ class Teacher(models.Model):
 
 
 class TeacherApplication(models.Model):
-    """Model for the teacher"""
+    """Model for the teacher application"""
     description = models.CharField(max_length=1000, blank=True, default='brak')
     status = models.CharField(default="waiting...", choices=TEACHER_APP_STATUS, max_length=255)
     user = models.OneToOneField(
@@ -172,12 +167,12 @@ class ClassWordList(models.Model):
     name = models.CharField(max_length=255)
     date = models.DateTimeField(default=datetime.now, blank=False)
     visibility = models.BooleanField(default=False)
-    teacher = models.ForeignKey(
-        Teacher,
-        on_delete=models.CASCADE
-    )
     classroom = models.ForeignKey(
         Classroom,
+        on_delete=models.CASCADE
+    )
+    teacher = models.ForeignKey(
+        Teacher,
         on_delete=models.CASCADE
     )
 
@@ -218,10 +213,6 @@ class ClassTest(models.Model):
     """Class test created for students by teacher"""
     name = models.CharField(max_length=255)
     date = models.DateTimeField(default=datetime.now, blank=False)
-    teacher = models.ForeignKey(
-        Teacher,
-        on_delete=models.CASCADE
-    )
     ratingsystem = models.OneToOneField(
         RatingSystem,
         on_delete=models.CASCADE
@@ -232,6 +223,11 @@ class ClassTest(models.Model):
     )
     classroom = models.ForeignKey(
         Classroom,
+        on_delete=models.CASCADE
+    )
+
+    teacher = models.ForeignKey(
+        Teacher,
         on_delete=models.CASCADE
     )
 

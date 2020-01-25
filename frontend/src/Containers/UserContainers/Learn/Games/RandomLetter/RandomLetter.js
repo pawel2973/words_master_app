@@ -292,7 +292,7 @@ class RandomLetter extends Component {
           <LinkContainer to={{ pathname: "/word-lists/" + this.state.wordlist_id + "/learn" }}>
             <BreadcrumbItem>Learn</BreadcrumbItem>
           </LinkContainer>
-          <BreadcrumbItem active>Letter By Letter mode</BreadcrumbItem>
+          <BreadcrumbItem active>Random letter mode</BreadcrumbItem>
         </Breadcrumb>
         {this.state.game_completed ? result : game}
       </Wrapper>

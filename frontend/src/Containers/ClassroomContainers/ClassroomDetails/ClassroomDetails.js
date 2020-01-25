@@ -66,8 +66,8 @@ class ClassroomDetail extends Component {
         this.setState({
           student_tests: [...tests],
           student_average_grade: student_average_grade,
-          student_grade_list: [...grade_list.reverse()],
-          student_labels_list: [...labels_list.reverse()]
+          student_grade_list: [...grade_list],
+          student_labels_list: [...labels_list]
         });
       })
       .catch(error => {

@@ -43,7 +43,6 @@ class App extends Component {
   state = {
     logged_in: !!localStorage.getItem("token"),
     email: "",
-    account_type: "",
     message: "",
     password: null,
     user_id: null,
@@ -57,8 +56,7 @@ class App extends Component {
       const user = JSON.parse(userData);
       this.setState({
         email: user.email,
-        user_id: user.id,
-        account_type: user.account_type
+        user_id: user.id
       });
     } else {
       localStorage.removeItem("token");
@@ -67,7 +65,6 @@ class App extends Component {
         logged_in: false,
         sign_in: false,
         email: "",
-        account_type: "",
         user_id: null
       });
     }
@@ -87,8 +84,7 @@ class App extends Component {
         this.setState({
           logged_in: true,
           email: res.data.email,
-          user_id: res.data.id,
-          account_type: res.data.account_type
+          user_id: res.data.id
         });
       })
       .catch(error => {});

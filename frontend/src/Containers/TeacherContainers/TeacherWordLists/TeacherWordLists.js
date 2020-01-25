@@ -113,9 +113,11 @@ class TeacherWordLists extends Component {
                 pathname: "/teacher/" + this.state.classroom_id + "/word-lists/" + wordlist.id + "/create-test"
               }}
             >
-              <Button variant="primary" block>
-                Create Test
-              </Button>
+              {wordlist.total_words === 0 ? null : (
+                <Button variant="primary" block>
+                  Create Test
+                </Button>
+              )}
             </Link>
           </td>
         </tr>

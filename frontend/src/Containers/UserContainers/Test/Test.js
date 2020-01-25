@@ -7,6 +7,7 @@ import { Button, Form, Table, Breadcrumb, BreadcrumbItem } from "react-bootstrap
 import Wrapper from "../../../Components/UI/Wrapper/Wrapper";
 import Modal from "../../../Components/UI/Modal/Modal";
 import happyLogo from "../../../Assets/happy.png";
+import errorLogo from "../../../Assets/error.png";
 
 class Test extends Component {
   state = {
@@ -96,7 +97,7 @@ class Test extends Component {
     let incorrect_answers = 0;
 
     const answers = [...this.state.user_words].map(obj => {
-      if (obj.english === obj.answer) {
+      if (obj.english.toLowerCase() === obj.answer.toLowerCase()) {
         correct_answers++;
         return {
           ...obj,
@@ -111,24 +112,31 @@ class Test extends Component {
       }
     });
 
-    //Create user test model in db
-    const formTestData = new FormData();
-    formTestData.append("correct_answers", correct_answers);
-    formTestData.append("incorrect_answers", incorrect_answers);
-    const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
+    if (correct_answers === 0 && incorrect_answers === 0) {
+      this.setState({
+        error: true,
+        message: "Word list is empty."
+      });
+    } else {
+      //Create user test model in db
+      const formTestData = new FormData();
+      formTestData.append("correct_answers", correct_answers);
+      formTestData.append("incorrect_answers", incorrect_answers);
+      const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
 
-    axios
-      .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", formTestData, { headers })
-      .then(res => {
-        //Save answers for test in db
-        return axios
-          .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + res.data.id + "/answers/", answers, {
-            headers
-          })
-          .catch(error => {});
-      })
-      .then(res => {})
-      .catch(error => {});
+      axios
+        .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/", formTestData, { headers })
+        .then(res => {
+          //Save answers for test in db
+          return axios
+            .post("/api/word/userwordlist/" + this.state.wordlist_id + "/tests/" + res.data.id + "/answers/", answers, {
+              headers
+            })
+            .catch(error => {});
+        })
+        .then(res => {})
+        .catch(error => {});
+    }
   };
 
   onUpdateWordHandler = (id, e) => {
@@ -142,6 +150,13 @@ class Test extends Component {
   successConfirmedHandler = () => {
     this.setState({
       success: false,
+      message: ""
+    });
+  };
+
+  errorConfirmedHandler = () => {
+    this.setState({
+      error: false,
       message: ""
     });
   };
@@ -192,6 +207,11 @@ class Test extends Component {
       <Wrapper>
         <Modal show={this.state.success} modalClosed={this.successConfirmedHandler}>
           <img src={happyLogo} alt="happy" />
+          {this.state.message}
+        </Modal>
+
+        <Modal show={this.state.error} modalClosed={this.errorConfirmedHandler}>
+          <img src={errorLogo} alt="error" />
           {this.state.message}
         </Modal>
 

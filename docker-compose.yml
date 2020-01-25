@@ -1,16 +1,10 @@
 version: "3"
 
 services:
-  # We have a service called backend and build section of the configuration
-  # When we build our backend we set a context which is our current dir
   backend:
-    build: ./backend    
+    build: ./backend
     ports:
       - "8000:8000"
-    # Volume allows us to get the updates that we make to our project into our docker image in real time.
-    # It maps of volume from our local machine into our docker container.
-    # Whenever you change something in the project it'll be automatically updated in the container
-    # and you don't need to restart docker to get the changes into effect.
     volumes:
       - ./backend:/app/backend
     command: >
@@ -31,18 +25,3 @@ services:
       - POSTGRES_DB=backend
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
-
-  # frontend:
-  #   build: ./frontend
-  #   volumes:
-  #     - ./frontend:/app
-  #     # One-way volume to use node_modules from inside image
-  #     - /app/node_modules
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - NODE_ENV=development
-  #   depends_on:
-  #     - backend
-  #   command: >
-  #     sh -c "npm start"

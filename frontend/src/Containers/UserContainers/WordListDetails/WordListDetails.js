@@ -102,8 +102,8 @@ class WordListDetails extends Component {
     e.preventDefault();
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     const formData = new FormData();
-    formData.append("english", this.state.new_english_word);
-    formData.append("polish", this.state.new_polish_word);
+    formData.append("english", this.state.new_english_word.toLowerCase());
+    formData.append("polish", this.state.new_polish_word.toLowerCase());
 
     axios
       .post("/api/word/userwordlist/" + this.state.wordlist_id + "/words/", formData, { headers })
@@ -142,8 +142,8 @@ class WordListDetails extends Component {
     e.preventDefault();
     const headers = { Authorization: `Token ${localStorage.getItem("token")}` };
     const word = {
-      polish: this.state.user_words[arr_id].polish,
-      english: this.state.user_words[arr_id].english
+      polish: this.state.user_words[arr_id].polish.toLowerCase(),
+      english: this.state.user_words[arr_id].english.toLowerCase()
     };
     const formData = new FormData();
     Object.keys(word).map(item => formData.append(item, word[item]));

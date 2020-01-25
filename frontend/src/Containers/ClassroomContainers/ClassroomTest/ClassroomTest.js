@@ -105,7 +105,7 @@ class ClassroomTest extends Component {
 
     // Check if answer is correct and add it to list
     const answers = [...this.state.class_test_words].map(obj => {
-      if (obj.english === obj.answer) {
+      if (obj.english.toLowerCase() === obj.answer.toLowerCase()) {
         correct_answers++;
         return {
           ...obj,

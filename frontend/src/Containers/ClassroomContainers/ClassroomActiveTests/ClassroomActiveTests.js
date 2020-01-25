@@ -49,7 +49,7 @@ class ClassroomActiveTests extends Component {
 
         classtests.forEach(c_test => {
           student_tests.forEach(s_test => {
-            if (c_test.id === s_test.classtest) {
+            if (c_test.id === s_test.classtest.id) {
               classroom_tests_to_remove.push(c_test);
             }
           });

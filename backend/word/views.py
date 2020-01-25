@@ -144,7 +144,6 @@ class UserTestView(viewsets.ModelViewSet):
 
 
 # /word/userwordlist/{pk}/tests/{pk}/answers/
-# DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}/
 class UserTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Manage user test answer in the database"""
     authentication_classes = (TokenAuthentication,)
@@ -538,7 +537,6 @@ class TeacherStudentShowTestView(viewsets.ModelViewSet):
 
 
 # /word/userwordlist/{pk}/tests/{pk}/answers/
-# DENIED: /word/userwordlist/{pk}/tests/{pk}/answers/{pk}/
 class StudentClassroomShowTestAnswerView(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Manage student test answer in the database"""
     authentication_classes = (TokenAuthentication,)

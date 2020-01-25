@@ -25,14 +25,13 @@ class CreateTokenView(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key, 'id': user.id, 'email': user.email, 'account_type': user.account_type})
+        return Response({'token': token.key, 'id': user.id, 'email': user.email})
 
 
 # /user/logout/
 class DestroyTokenView(generics.CreateAPIView):
     serializer_class = TokenSerializer
     authentication_classes = (authentication.TokenAuthentication,)
-    # permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         Token.objects.filter(user=self.request.user).delete()
@@ -50,5 +49,4 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def patch(self, request, *args, **kwargs):
-        print(self.request.data)
         return self.partial_update(request, *args, **kwargs)
